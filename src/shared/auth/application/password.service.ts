@@ -5,11 +5,11 @@ import * as bcrypt from 'bcrypt';
 export class PasswordService {
   private readonly rounds = 12;
 
-  hash(plain: string): Promise<string> {
-    return bcrypt.hash(plain, this.rounds);
+  async hash(plain: string): Promise<string> {
+    return await bcrypt.hash(plain, this.rounds);
   }
 
-  compare(plain: string, hash: string): Promise<boolean> {
-    return bcrypt.compare(plain, hash);
+  async compare(plain: string, hash: string): Promise<boolean> {
+    return await bcrypt.compare(plain, hash);
   }
 }

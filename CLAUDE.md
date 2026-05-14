@@ -88,16 +88,20 @@ Background Java/.NET do Gean. Quebrar essas regras é code smell:
 
 ---
 
-## Pendências conhecidas no scaffold inicial
+## Padrões já estabelecidos no codebase (aplicados em 2026-05-14)
 
-Scaffold de 2026-05-13 foi feito rápido e tem violações conscientes das regras acima. Gean explicitamente disse "por hora não afeta". Lista pra refactor futuro:
+Olhe os módulos existentes (`imoveis`, `clientes`, `interacoes`, `matching`) como referência ao adicionar features novas — eles seguem todos os padrões:
 
-- [ ] `MatchingService` injeta `PrismaService` direto → criar `MatchingRepository`
-- [ ] Services devolvem tipos Prisma (`ImovelDetailed`, `ClienteDetailed`, etc) → adicionar `mapToResponse` + DTOs de resposta
-- [ ] `MatchingController` lista sem paginação → paginar
-- [ ] Varrer `if` em uma linha e corrigir
-- [ ] Auditar `async/await` consistente
-- [ ] Migrar `package.json#prisma.seed` pra `prisma.config.ts` (Prisma 7 vai remover)
+- **DTOs separados por arquivo**: `<feature>.dtos.ts` (Create/Update/ListQuery — input) e `<feature>-response.dtos.ts` (Response — output). Update sempre via `extends PartialType(Create)`.
+- **Mapper isolado**: `application/<feature>.mapper.ts` exporta `mapXToResponse` e `mapXToListItem`. Service nunca devolve tipo Prisma direto.
+- **Lista com `findManyWithTotal`**: repository faz `$transaction([findMany, count])`, service envolve em `new PaginatedResponseDto(items.map(mapper), total, page, limit)`.
+- **Query DTO estende `BasePaginationQueryDto`** (`shared/dto/base-pagination-query.dto.ts`) — herda `page`, `limit`, `search` automaticamente, só adiciona filtros específicos.
+- **Select consts tipados**: cada repository exporta `xDetailedSelect` e `xListSelect` com `satisfies Prisma.XSelect`, e os tipos `XDetailed`/`XListItem` derivados via `Prisma.XGetPayload`.
+- **Auth também segue o padrão**: `UserRepository` no `shared/auth/repository/`, `AuthService` injeta o repo (nunca `PrismaService`).
+
+## Pendências menores
+
+- [ ] Migrar `package.json#prisma.seed` pra `prisma.config.ts` (Prisma 7 vai remover essa config legada)
 
 ---
 

@@ -12,7 +12,7 @@ export class FeedPortaisController {
   @Get('imoveis.xml')
   @Header('Content-Type', 'application/xml; charset=utf-8')
   @Header('Cache-Control', 'public, max-age=300')
-  generateXml(): Promise<string> {
-    return this.service.generateXml();
+  async generateXml(): Promise<string> {
+    return await this.service.generateXml();
   }
 }

@@ -8,13 +8,14 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   Length,
-  Max,
   Min,
   MinLength,
 } from 'class-validator';
 import { PartialType } from '@nestjs/swagger';
 import { Finalidade, TipoImovel } from '@prisma/client';
+import { BasePaginationQueryDto } from '../../../../shared/dto/base-pagination-query.dto';
 
 export class CreateClienteDto {
   @IsString() @MinLength(2) nome: string;
@@ -36,16 +37,13 @@ export class CreateClienteDto {
 
 export class UpdateClienteDto extends PartialType(CreateClienteDto) {}
 
-export class ListClientesQueryDto {
-  @IsOptional() @Type(() => Number) @IsInt() @Min(1) page?: number = 1;
-  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) limit?: number = 20;
-  @IsOptional() @IsString() search?: string;
+export class ListClientesQueryDto extends BasePaginationQueryDto {
   @IsOptional() @IsEnum(TipoImovel) tipoDesejado?: TipoImovel;
   @IsOptional() @IsString() cidadeDesejada?: string;
 }
 
 export class LinkImovelDto {
-  @IsString() @IsNotEmpty() imovelId: string;
-  @IsOptional() @IsInt() @Min(1) @Max(5) interesse?: number;
+  @IsUUID() imovelId: string;
+  @IsOptional() @IsInt() @Min(1) interesse?: number;
   @IsOptional() @IsString() nota?: string;
 }

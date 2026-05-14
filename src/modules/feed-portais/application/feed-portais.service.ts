@@ -59,24 +59,46 @@ export class FeedPortaisService {
 
     node.ele('ListingID').txt(im.codigo).up();
     node.ele('Title').txt(im.titulo).up();
-    if (im.descricao) node.ele('Description').dat(im.descricao).up();
+
+    if (im.descricao) {
+      node.ele('Description').dat(im.descricao).up();
+    }
 
     const transactionType = this.finalidadeToTransaction(im.finalidade);
     node.ele('TransactionType').txt(transactionType).up();
 
     const details = node.ele('Details');
     details.ele('PropertyType').txt(TIPO_MAP[im.tipo]).up();
-    if (im.quartos !== null && im.quartos !== undefined) details.ele('Bedrooms').txt(String(im.quartos)).up();
-    if (im.banheiros !== null && im.banheiros !== undefined) details.ele('Bathrooms').txt(String(im.banheiros)).up();
-    if (im.suites !== null && im.suites !== undefined) details.ele('Suites').txt(String(im.suites)).up();
-    if (im.vagas !== null && im.vagas !== undefined) details.ele('Garage').txt(String(im.vagas)).up();
-    details.ele('LivingArea', { unit: 'square metres' }).txt(String(im.area)).up();
-    if (im.areaTotal) details.ele('LotArea', { unit: 'square metres' }).txt(String(im.areaTotal)).up();
-    if (im.anoConstrucao) details.ele('YearBuilt').txt(String(im.anoConstrucao)).up();
 
-    const prices = details.ele('ListPrice', { currency: 'BRL' }).txt(String(im.valor)).up();
+    if (im.quartos !== null && im.quartos !== undefined) {
+      details.ele('Bedrooms').txt(String(im.quartos)).up();
+    }
+    if (im.banheiros !== null && im.banheiros !== undefined) {
+      details.ele('Bathrooms').txt(String(im.banheiros)).up();
+    }
+    if (im.suites !== null && im.suites !== undefined) {
+      details.ele('Suites').txt(String(im.suites)).up();
+    }
+    if (im.vagas !== null && im.vagas !== undefined) {
+      details.ele('Garage').txt(String(im.vagas)).up();
+    }
+
+    details.ele('LivingArea', { unit: 'square metres' }).txt(String(im.area)).up();
+
+    if (im.areaTotal) {
+      details.ele('LotArea', { unit: 'square metres' }).txt(String(im.areaTotal)).up();
+    }
+    if (im.anoConstrucao) {
+      details.ele('YearBuilt').txt(String(im.anoConstrucao)).up();
+    }
+
+    details.ele('ListPrice', { currency: 'BRL' }).txt(String(im.valor)).up();
+
     if (im.valorCondominio) {
-      details.ele('PropertyAdministrationFee', { currency: 'BRL' }).txt(String(im.valorCondominio)).up();
+      details
+        .ele('PropertyAdministrationFee', { currency: 'BRL' })
+        .txt(String(im.valorCondominio))
+        .up();
     }
     if (im.valorIptu) {
       details.ele('YearlyTax', { currency: 'BRL' }).txt(String(im.valorIptu)).up();
@@ -84,7 +106,9 @@ export class FeedPortaisService {
 
     if (im.caracteristicas?.length) {
       const features = details.ele('Features');
-      for (const f of im.caracteristicas) features.ele('Feature').txt(f).up();
+      for (const f of im.caracteristicas) {
+        features.ele('Feature').txt(f).up();
+      }
     }
 
     if (im.fotos?.length) {
@@ -92,7 +116,9 @@ export class FeedPortaisService {
       for (const foto of im.fotos) {
         media.ele('Item', { medium: 'image', caption: foto.legenda ?? '' }).txt(foto.url).up();
       }
-      if (im.videoUrl) media.ele('Item', { medium: 'video' }).txt(im.videoUrl).up();
+      if (im.videoUrl) {
+        media.ele('Item', { medium: 'video' }).txt(im.videoUrl).up();
+      }
     }
 
     const location = node.ele('Location', { displayAddress: 'Neighborhood' });
@@ -100,8 +126,14 @@ export class FeedPortaisService {
     location.ele('State', { abbreviation: im.estado }).txt(im.estado).up();
     location.ele('City').txt(im.cidade).up();
     location.ele('Neighborhood').txt(im.bairro).up();
-    location.ele('Address').txt(`${im.endereco}${im.numero ? ', ' + im.numero : ''}`).up();
-    if (im.cep) location.ele('PostalCode').txt(im.cep).up();
+    location
+      .ele('Address')
+      .txt(`${im.endereco}${im.numero ? ', ' + im.numero : ''}`)
+      .up();
+
+    if (im.cep) {
+      location.ele('PostalCode').txt(im.cep).up();
+    }
     if (im.latitude && im.longitude) {
       location.ele('Latitude').txt(String(im.latitude)).up();
       location.ele('Longitude').txt(String(im.longitude)).up();

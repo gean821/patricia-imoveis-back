@@ -95,30 +95,34 @@ interface FindManyArgs {
 export class ImoveisRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(data: Prisma.ImovelCreateInput): Promise<ImovelDetailed> {
-    return this.prisma.imovel.create({ data, select: imovelDetailedSelect });
+  async create(data: Prisma.ImovelCreateInput): Promise<ImovelDetailed> {
+    return await this.prisma.imovel.create({ data, select: imovelDetailedSelect });
   }
 
-  findById(id: string): Promise<ImovelDetailed | null> {
-    return this.prisma.imovel.findFirst({
+  async findById(id: string): Promise<ImovelDetailed | null> {
+    return await this.prisma.imovel.findFirst({
       where: { id, deletedAt: null },
       select: imovelDetailedSelect,
     });
   }
 
-  findByCodigo(codigo: string): Promise<ImovelDetailed | null> {
-    return this.prisma.imovel.findFirst({
+  async findByCodigo(codigo: string): Promise<ImovelDetailed | null> {
+    return await this.prisma.imovel.findFirst({
       where: { codigo, deletedAt: null },
       select: imovelDetailedSelect,
     });
   }
 
-  update(id: string, data: Prisma.ImovelUpdateInput): Promise<ImovelDetailed> {
-    return this.prisma.imovel.update({ where: { id }, data, select: imovelDetailedSelect });
+  async update(id: string, data: Prisma.ImovelUpdateInput): Promise<ImovelDetailed> {
+    return await this.prisma.imovel.update({
+      where: { id },
+      data,
+      select: imovelDetailedSelect,
+    });
   }
 
-  softDelete(id: string): Promise<ImovelDetailed> {
-    return this.prisma.imovel.update({
+  async softDelete(id: string): Promise<ImovelDetailed> {
+    return await this.prisma.imovel.update({
       where: { id },
       data: { deletedAt: new Date(), status: 'INATIVO' },
       select: imovelDetailedSelect,
@@ -136,11 +140,12 @@ export class ImoveisRepository {
       }),
       this.prisma.imovel.count({ where: args.where }),
     ]);
+
     return { items, total };
   }
 
-  findAllForFeed(): Promise<ImovelDetailed[]> {
-    return this.prisma.imovel.findMany({
+  async findAllForFeed(): Promise<ImovelDetailed[]> {
+    return await this.prisma.imovel.findMany({
       where: { deletedAt: null, status: 'DISPONIVEL', publicadoFeed: true },
       select: imovelDetailedSelect,
       orderBy: [{ destaque: 'desc' }, { updatedAt: 'desc' }],

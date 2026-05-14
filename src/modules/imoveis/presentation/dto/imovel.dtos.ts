@@ -11,13 +11,13 @@ import {
   IsOptional,
   IsString,
   Length,
-  Max,
   Min,
   MinLength,
   ValidateNested,
 } from 'class-validator';
 import { PartialType } from '@nestjs/swagger';
 import { Finalidade, StatusImovel, TipoImovel } from '@prisma/client';
+import { BasePaginationQueryDto } from '../../../../shared/dto/base-pagination-query.dto';
 
 export class FotoInputDto {
   @IsString()
@@ -80,12 +80,10 @@ export class CreateImovelDto {
   @IsOptional() @IsLatitude() latitude?: number;
   @IsOptional() @IsLongitude() longitude?: number;
 
-  // valores
   @Type(() => Number) @IsNumber() @Min(0) valor: number;
   @IsOptional() @Type(() => Number) @IsNumber() @Min(0) valorCondominio?: number;
   @IsOptional() @Type(() => Number) @IsNumber() @Min(0) valorIptu?: number;
 
-  // detalhes
   @Type(() => Number) @IsNumber() @Min(0) area: number;
   @IsOptional() @Type(() => Number) @IsNumber() @Min(0) areaTotal?: number;
   @IsOptional() @IsInt() @Min(0) quartos?: number;
@@ -107,7 +105,6 @@ export class CreateImovelDto {
   @Type(() => FotoInputDto)
   fotos?: FotoInputDto[];
 
-  // portais
   @IsOptional() @IsBoolean() publicadoFeed?: boolean;
   @IsOptional() @IsBoolean() publicadoOlx?: boolean;
   @IsOptional() @IsBoolean() publicadoChavesNaMao?: boolean;
@@ -118,10 +115,7 @@ export class CreateImovelDto {
 
 export class UpdateImovelDto extends PartialType(CreateImovelDto) {}
 
-export class ListImoveisQueryDto {
-  @IsOptional() @Type(() => Number) @IsInt() @Min(1) page?: number = 1;
-  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) limit?: number = 20;
-  @IsOptional() @IsString() search?: string;
+export class ListImoveisQueryDto extends BasePaginationQueryDto {
   @IsOptional() @IsEnum(TipoImovel) tipo?: TipoImovel;
   @IsOptional() @IsEnum(Finalidade) finalidade?: Finalidade;
   @IsOptional() @IsEnum(StatusImovel) status?: StatusImovel;

@@ -1,7 +1,12 @@
-import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ImoveisService } from '../application/imoveis.service';
 import { ListImoveisQueryDto } from './dto/imovel.dtos';
+import {
+  ImovelListItemResponseDto,
+  ImovelResponseDto,
+} from './dto/imovel-response.dtos';
+import { PaginatedResponseDto } from '../../../shared/dto/paginated-response.dto';
 import { Public } from '../../../shared/auth/decorators/public.decorator';
 
 @ApiTags('vitrine')
@@ -11,21 +16,25 @@ export class ImoveisPublicController {
   constructor(private readonly service: ImoveisService) {}
 
   @Get()
-  list(@Query() query: ListImoveisQueryDto) {
-    return this.service.listPublic(query);
+  async list(
+    @Query() query: ListImoveisQueryDto,
+  ): Promise<PaginatedResponseDto<ImovelListItemResponseDto>> {
+    return await this.service.listPublic(query);
   }
 
   @Get('destaques')
-  destaques(@Query() query: ListImoveisQueryDto) {
-    return this.service.listPublic({ ...query, destaque: true, limit: query.limit ?? 6 });
+  async destaques(
+    @Query() query: ListImoveisQueryDto,
+  ): Promise<PaginatedResponseDto<ImovelListItemResponseDto>> {
+    return await this.service.listPublic({
+      ...query,
+      destaque: true,
+      limit: query.limit ?? 6,
+    });
   }
 
   @Get(':codigo')
-  async findByCodigo(@Param('codigo') codigo: string) {
-    const imovel = await this.service.findByCodigo(codigo);
-    if (imovel.status !== 'DISPONIVEL' && imovel.status !== 'RESERVADO' && imovel.status !== 'NEGOCIACAO') {
-      throw new NotFoundException();
-    }
-    return imovel;
+  async findByCodigo(@Param('codigo') codigo: string): Promise<ImovelResponseDto> {
+    return await this.service.findByCodigoPublic(codigo);
   }
 }

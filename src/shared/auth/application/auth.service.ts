@@ -1,31 +1,62 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { User } from '@prisma/client';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
+import { UserRepository } from '../repository/user.repository';
 import { LoginDto } from '../presentation/dto/login.dto';
-import { AuthResponseDto } from '../presentation/dto/auth-response.dto';
+import {
+  AuthResponseDto,
+  UserResponseDto,
+} from '../presentation/dto/auth-response.dto';
+import { mapUserToResponse, mapUserToSession } from './auth.mapper';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly users: UserRepository,
     private readonly password: PasswordService,
     private readonly token: TokenService,
-  ) { }
+  ) {}
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const user = await this.users.findByEmail(dto.email);
 
     if (!user || !user.isActive) {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    const ok = await this.password.compare(dto.password, user.passwordHash);
-    if (!ok) {
+    const valid = await this.password.compare(dto.password, user.passwordHash);
+    if (!valid) {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
+    return await this.issueTokens(user);
+  }
+
+  async refresh(refreshToken: string): Promise<AuthResponseDto> {
+    const payload = await this.token.verify(refreshToken);
+    const user = await this.users.findById(payload.sub);
+
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException('Usuário inativo');
+    }
+
+    return await this.issueTokens(user);
+  }
+
+  async me(userId: string): Promise<UserResponseDto> {
+    const user = await this.users.findById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    return mapUserToResponse(user);
+  }
+
+  private async issueTokens(user: User): Promise<AuthResponseDto> {
     const payload = { sub: user.id, email: user.email, name: user.name, role: user.role };
+
     const [accessToken, refreshToken] = await Promise.all([
       this.token.sign(payload, 'access'),
       this.token.sign(payload, 'refresh'),
@@ -34,31 +65,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      user: mapUserToSession(user),
     };
-  }
-
-  async refresh(refreshToken: string): Promise<AuthResponseDto> {
-    const payload = await this.token.verify(refreshToken);
-    const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
-    if (!user || !user.isActive) throw new UnauthorizedException('Usuário inativo');
-
-    const next = { sub: user.id, email: user.email, name: user.name, role: user.role };
-    const [newAccess, newRefresh] = await Promise.all([
-      this.token.sign(next, 'access'),
-      this.token.sign(next, 'refresh'),
-    ]);
-
-    return {
-      accessToken: newAccess,
-      refreshToken: newRefresh,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
-    };
-  }
-
-  async me(userId: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new UnauthorizedException();
-    return { id: user.id, name: user.name, email: user.email, role: user.role };
   }
 }

@@ -19,9 +19,18 @@ async function bootstrap() {
   const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
   app.enableCors({
     origin: (origin, cb) => {
-      if (!origin) return cb(null, true);
-      if (allowedOrigins.length === 0) return cb(null, true);
-      if (allowedOrigins.includes(origin)) return cb(null, true);
+      if (!origin) {
+        return cb(null, true);
+      }
+
+      if (allowedOrigins.length === 0) {
+        return cb(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return cb(null, true);
+      }
+
       return cb(new Error(`CORS bloqueado: ${origin}`), false);
     },
 
@@ -30,6 +39,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
+  app.setGlobalPrefix('api');
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -48,6 +58,7 @@ async function bootstrap() {
     .setVersion('0.1.0')
     .addBearerAuth()
     .build();
+
   const doc = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, doc);
 

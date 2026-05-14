@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Interacao, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 
 export const interacaoSelect = {
@@ -21,31 +21,39 @@ export const interacaoSelect = {
 
 export type InteracaoDetailed = Prisma.InteracaoGetPayload<{ select: typeof interacaoSelect }>;
 
+interface FindManyArgs {
+  skip: number;
+  take: number;
+  where: Prisma.InteracaoWhereInput;
+}
+
 @Injectable()
 export class InteracoesRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
-  create(data: Prisma.InteracaoCreateInput): Promise<InteracaoDetailed> {
-    return this.prisma.interacao.create({ data, select: interacaoSelect });
+  async create(data: Prisma.InteracaoCreateInput): Promise<InteracaoDetailed> {
+    return await this.prisma.interacao.create({ data, select: interacaoSelect });
   }
 
-  findById(id: string): Promise<InteracaoDetailed | null> {
-    return this.prisma.interacao.findUnique({ where: { id }, select: interacaoSelect });
+  async findById(id: string): Promise<InteracaoDetailed | null> {
+    return await this.prisma.interacao.findUnique({ where: { id }, select: interacaoSelect });
   }
 
-  update(id: string, data: Prisma.InteracaoUpdateInput): Promise<InteracaoDetailed> {
-    return this.prisma.interacao.update({ where: { id }, data, select: interacaoSelect });
+  async update(id: string, data: Prisma.InteracaoUpdateInput): Promise<InteracaoDetailed> {
+    return await this.prisma.interacao.update({
+      where: { id },
+      data,
+      select: interacaoSelect,
+    });
   }
 
-  delete(id: string) {
-    return this.prisma.interacao.delete({ where: { id } });
+  async delete(id: string): Promise<Interacao> {
+    return await this.prisma.interacao.delete({ where: { id } });
   }
 
-  async findManyWithTotal(args: {
-    skip: number;
-    take: number;
-    where: Prisma.InteracaoWhereInput;
-  }): Promise<{ items: InteracaoDetailed[]; total: number }> {
+  async findManyWithTotal(
+    args: FindManyArgs,
+  ): Promise<{ items: InteracaoDetailed[]; total: number }> {
     const [items, total] = await this.prisma.$transaction([
       this.prisma.interacao.findMany({
         skip: args.skip,
@@ -56,14 +64,7 @@ export class InteracoesRepository {
       }),
       this.prisma.interacao.count({ where: args.where }),
     ]);
-    return { items, total };
-  }
 
-  findTimelineByCliente(clienteId: string): Promise<InteracaoDetailed[]> {
-    return this.prisma.interacao.findMany({
-      where: { clienteId },
-      orderBy: { data: 'desc' },
-      select: interacaoSelect,
-    });
+    return { items, total };
   }
 }

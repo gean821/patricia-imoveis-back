@@ -61,7 +61,7 @@ export class StorageService {
   }
 
   async getSignedDownloadUrl(key: string, expiresIn = 3600): Promise<string> {
-    return getSignedUrl(
+    return await getSignedUrl(
       this.s3,
       new GetObjectCommand({ Bucket: this.bucket, Key: key }),
       { expiresIn },
@@ -69,7 +69,9 @@ export class StorageService {
   }
 
   buildPublicUrl(key: string): string {
-    if (this.publicUrl) return `${this.publicUrl.replace(/\/$/, '')}/${key}`;
+    if (this.publicUrl) {
+      return `${this.publicUrl.replace(/\/$/, '')}/${key}`;
+    }
     return `${this.bucket}/${key}`;
   }
 }

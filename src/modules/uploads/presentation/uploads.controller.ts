@@ -13,15 +13,9 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
-import { IsNotEmpty, IsString } from 'class-validator';
 import { UploadsService } from '../application/uploads.service';
+import { DeleteFileDto, UploadFileResponseDto } from './dto/upload.dtos';
 import { RequireRoles } from '../../../shared/auth/decorators/roles.decorator';
-
-class DeleteFileDto {
-  @IsString()
-  @IsNotEmpty()
-  key: string;
-}
 
 @ApiTags('admin: uploads')
 @ApiBearerAuth()
@@ -36,28 +30,28 @@ export class UploadsController {
   async uploadFoto(
     @Param('imovelId', ParseUUIDPipe) imovelId: string,
     @UploadedFile() file: Express.Multer.File,
-  ) {
+  ): Promise<UploadFileResponseDto> {
     return await this.service.uploadFotoImovel(imovelId, file);
   }
 
   @Post('imoveis/:imovelId/video')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
-  uploadVideo(
+  async uploadVideo(
     @Param('imovelId', ParseUUIDPipe) imovelId: string,
     @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.service.uploadVideoImovel(imovelId, file);
+  ): Promise<UploadFileResponseDto> {
+    return await this.service.uploadVideoImovel(imovelId, file);
   }
 
   @Post('imoveis/:imovelId/planta')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
-  uploadPlanta(
+  async uploadPlanta(
     @Param('imovelId', ParseUUIDPipe) imovelId: string,
     @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.service.uploadPlantaImovel(imovelId, file);
+  ): Promise<UploadFileResponseDto> {
+    return await this.service.uploadPlantaImovel(imovelId, file);
   }
 
   @Delete()

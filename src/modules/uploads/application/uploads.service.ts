@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { StorageService, UploadResult } from '../../../shared/storage/storage.service';
+import { StorageService } from '../../../shared/storage/storage.service';
+import { UploadFileResponseDto } from '../presentation/dto/upload.dtos';
 
 const ALLOWED_IMAGE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
 const ALLOWED_VIDEO_MIME = new Set(['video/mp4', 'video/webm', 'video/quicktime']);
@@ -10,42 +11,62 @@ const ALLOWED_DOC_MIME = new Set([
   'image/webp',
 ]);
 
-const MAX_IMAGE = 10 * 1024 * 1024; // 10MB
-const MAX_VIDEO = 200 * 1024 * 1024; // 200MB
-const MAX_DOC = 25 * 1024 * 1024; // 25MB
+const MAX_IMAGE = 10 * 1024 * 1024;
+const MAX_VIDEO = 200 * 1024 * 1024;
+const MAX_DOC = 25 * 1024 * 1024;
 
 @Injectable()
 export class UploadsService {
   constructor(private readonly storage: StorageService) {}
 
-  async uploadFotoImovel(imovelId: string, file: Express.Multer.File): Promise<UploadResult> {
+  async uploadFotoImovel(
+    imovelId: string,
+    file: Express.Multer.File,
+  ): Promise<UploadFileResponseDto> {
     this.assertFile(file, ALLOWED_IMAGE_MIME, MAX_IMAGE);
-    return this.storage.upload(`imoveis/${imovelId}/fotos`, file);
+    const result = await this.storage.upload(`imoveis/${imovelId}/fotos`, file);
+    return { key: result.key, url: result.url };
   }
 
-  async uploadVideoImovel(imovelId: string, file: Express.Multer.File): Promise<UploadResult> {
+  async uploadVideoImovel(
+    imovelId: string,
+    file: Express.Multer.File,
+  ): Promise<UploadFileResponseDto> {
     this.assertFile(file, ALLOWED_VIDEO_MIME, MAX_VIDEO);
-    return this.storage.upload(`imoveis/${imovelId}/videos`, file);
+    const result = await this.storage.upload(`imoveis/${imovelId}/videos`, file);
+    return { key: result.key, url: result.url };
   }
 
-  async uploadPlantaImovel(imovelId: string, file: Express.Multer.File): Promise<UploadResult> {
+  async uploadPlantaImovel(
+    imovelId: string,
+    file: Express.Multer.File,
+  ): Promise<UploadFileResponseDto> {
     this.assertFile(file, ALLOWED_DOC_MIME, MAX_DOC);
-    return this.storage.upload(`imoveis/${imovelId}/plantas`, file);
+    const result = await this.storage.upload(`imoveis/${imovelId}/plantas`, file);
+    return { key: result.key, url: result.url };
   }
 
-  delete(key: string): Promise<void> {
-    return this.storage.delete(key);
+  async delete(key: string): Promise<void> {
+    await this.storage.delete(key);
   }
 
-  private assertFile(file: Express.Multer.File, allowed: Set<string>, maxSize: number) {
-    if (!file) throw new BadRequestException('Arquivo obrigatório');
+  private assertFile(
+    file: Express.Multer.File,
+    allowed: Set<string>,
+    maxSize: number,
+  ): void {
+    if (!file) {
+      throw new BadRequestException('Arquivo obrigatório');
+    }
     if (!allowed.has(file.mimetype)) {
       throw new BadRequestException(
         `Tipo não permitido (${file.mimetype}). Aceitos: ${[...allowed].join(', ')}`,
       );
     }
     if (file.size > maxSize) {
-      throw new BadRequestException(`Arquivo muito grande (max ${Math.round(maxSize / 1024 / 1024)}MB)`);
+      throw new BadRequestException(
+        `Arquivo muito grande (max ${Math.round(maxSize / 1024 / 1024)}MB)`,
+      );
     }
   }
 }

@@ -14,7 +14,16 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { ImoveisService } from '../application/imoveis.service';
-import { CreateImovelDto, ListImoveisQueryDto, UpdateImovelDto } from './dto/imovel.dtos';
+import {
+  CreateImovelDto,
+  ListImoveisQueryDto,
+  UpdateImovelDto,
+} from './dto/imovel.dtos';
+import {
+  ImovelListItemResponseDto,
+  ImovelResponseDto,
+} from './dto/imovel-response.dtos';
+import { PaginatedResponseDto } from '../../../shared/dto/paginated-response.dto';
 import { RequireRoles } from '../../../shared/auth/decorators/roles.decorator';
 
 @ApiTags('admin: imoveis')
@@ -22,26 +31,31 @@ import { RequireRoles } from '../../../shared/auth/decorators/roles.decorator';
 @RequireRoles(Role.ADMIN, Role.CORRETOR)
 @Controller('admin/imoveis')
 export class ImoveisController {
-  constructor(private readonly service: ImoveisService) { }
+  constructor(private readonly service: ImoveisService) {}
 
   @Post()
-  create(@Body() dto: CreateImovelDto) {
-    return this.service.create(dto);
+  async create(@Body() dto: CreateImovelDto): Promise<ImovelResponseDto> {
+    return await this.service.create(dto);
   }
 
   @Get()
-  list(@Query() query: ListImoveisQueryDto) {
-    return this.service.list(query);
+  async list(
+    @Query() query: ListImoveisQueryDto,
+  ): Promise<PaginatedResponseDto<ImovelListItemResponseDto>> {
+    return await this.service.list(query);
   }
 
   @Get(':id')
-  findById(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.findById(id);
+  async findById(@Param('id', ParseUUIDPipe) id: string): Promise<ImovelResponseDto> {
+    return await this.service.findById(id);
   }
 
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateImovelDto) {
-    return this.service.update(id, dto);
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateImovelDto,
+  ): Promise<ImovelResponseDto> {
+    return await this.service.update(id, dto);
   }
 
   @Delete(':id')

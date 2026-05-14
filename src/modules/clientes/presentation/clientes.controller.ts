@@ -20,6 +20,12 @@ import {
   ListClientesQueryDto,
   UpdateClienteDto,
 } from './dto/cliente.dtos';
+import {
+  ClienteImovelLinkResponseDto,
+  ClienteListItemResponseDto,
+  ClienteResponseDto,
+} from './dto/cliente-response.dtos';
+import { PaginatedResponseDto } from '../../../shared/dto/paginated-response.dto';
 import { RequireRoles } from '../../../shared/auth/decorators/roles.decorator';
 
 @ApiTags('admin: clientes')
@@ -30,23 +36,28 @@ export class ClientesController {
   constructor(private readonly service: ClientesService) {}
 
   @Post()
-  create(@Body() dto: CreateClienteDto) {
-    return this.service.create(dto);
+  async create(@Body() dto: CreateClienteDto): Promise<ClienteResponseDto> {
+    return await this.service.create(dto);
   }
 
   @Get()
-  list(@Query() query: ListClientesQueryDto) {
-    return this.service.list(query);
+  async list(
+    @Query() query: ListClientesQueryDto,
+  ): Promise<PaginatedResponseDto<ClienteListItemResponseDto>> {
+    return await this.service.list(query);
   }
 
   @Get(':id')
-  findById(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.findById(id);
+  async findById(@Param('id', ParseUUIDPipe) id: string): Promise<ClienteResponseDto> {
+    return await this.service.findById(id);
   }
 
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateClienteDto) {
-    return this.service.update(id, dto);
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateClienteDto,
+  ): Promise<ClienteResponseDto> {
+    return await this.service.update(id, dto);
   }
 
   @Delete(':id')
@@ -56,8 +67,11 @@ export class ClientesController {
   }
 
   @Post(':id/imoveis')
-  linkImovel(@Param('id', ParseUUIDPipe) id: string, @Body() dto: LinkImovelDto) {
-    return this.service.linkImovel(id, dto.imovelId, dto.interesse, dto.nota);
+  async linkImovel(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: LinkImovelDto,
+  ): Promise<ClienteImovelLinkResponseDto> {
+    return await this.service.linkImovel(id, dto.imovelId, dto.interesse, dto.nota);
   }
 
   @Delete(':id/imoveis/:imovelId')

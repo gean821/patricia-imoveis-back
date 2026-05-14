@@ -20,7 +20,7 @@ export class TokenService {
 
   async sign(user: AuthUser, kind: TokenKind = 'access'): Promise<string> {
     const expiresIn = kind === 'access' ? this.accessExpiresIn : this.refreshExpiresIn;
-    return new SignJWT({ ...user, token_use: kind })
+    return await new SignJWT({ ...user, token_use: kind })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setExpirationTime(expiresIn)
