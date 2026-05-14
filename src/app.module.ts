@@ -6,6 +6,7 @@ import { AuthModule } from './shared/auth/auth.module';
 import { StorageModule } from './shared/storage/storage.module';
 import { JwtAuthGuard } from './shared/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './shared/auth/guards/roles.guard';
+import { HealthModule } from './modules/health/health.module';
 import { ImoveisModule } from './modules/imoveis/imoveis.module';
 import { ClientesModule } from './modules/clientes/clientes.module';
 import { InteracoesModule } from './modules/interacoes/interacoes.module';
@@ -24,6 +25,7 @@ import configuration from './config/configuration';
     PrismaModule,
     StorageModule,
     AuthModule,
+    HealthModule,
     ImoveisModule,
     ClientesModule,
     InteracoesModule,

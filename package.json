@@ -20,9 +20,6 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "test": "jest"
   },
-  "prisma": {
-    "seed": "ts-node -r tsconfig-paths/register -r dotenv/config prisma/seed.ts"
-  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1000.0",
     "@aws-sdk/s3-request-presigner": "^3.1000.0",

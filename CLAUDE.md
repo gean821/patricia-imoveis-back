@@ -99,10 +99,6 @@ Olhe os módulos existentes (`imoveis`, `clientes`, `interacoes`, `matching`) co
 - **Select consts tipados**: cada repository exporta `xDetailedSelect` e `xListSelect` com `satisfies Prisma.XSelect`, e os tipos `XDetailed`/`XListItem` derivados via `Prisma.XGetPayload`.
 - **Auth também segue o padrão**: `UserRepository` no `shared/auth/repository/`, `AuthService` injeta o repo (nunca `PrismaService`).
 
-## Pendências menores
-
-- [ ] Migrar `package.json#prisma.seed` pra `prisma.config.ts` (Prisma 7 vai remover essa config legada)
-
 ---
 
 ## Como rodar local
@@ -133,6 +129,7 @@ Variáveis críticas no `.env`:
 
 | Método | Rota | Auth |
 |---|---|---|
+| GET | `/health` | público (Railway healthcheck) |
 | POST | `/auth/login` `/auth/refresh` | público |
 | GET | `/auth/me` | bearer |
 | `*` | `/admin/imoveis` `/admin/clientes` `/admin/interacoes` `/admin/matching/*` `/admin/uploads/*` | bearer (ADMIN/CORRETOR) |
