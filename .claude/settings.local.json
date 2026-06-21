@@ -3,7 +3,12 @@
     "allow": [
       "Bash(pnpm build *)",
       "Bash(pnpm -v)",
-      "Bash(npm view *)"
+      "Bash(npm view *)",
+      "Read(//c/Users/User/Documents/git/Freelas/**)",
+      "Read(//c/Users/User/Documents/git/**)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "shadcn"
+  ]
 }

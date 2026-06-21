@@ -40,3 +40,5 @@ Thumbs.db
 
 # Uploads locais (dev only)
 /uploads
+
+.claude
