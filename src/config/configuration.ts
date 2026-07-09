@@ -20,8 +20,8 @@ export default () => ({
   },
 
   storage: {
-    endpoint: process.env.STORAGE_ENDPOINT ?? 'https://fly.storage.tigris.dev',
-    region: process.env.STORAGE_REGION ?? 'auto',
+    endpoint: process.env.STORAGE_ENDPOINT,
+    region: process.env.STORAGE_REGION ?? 'us-west-004',
     bucket: process.env.STORAGE_BUCKET ?? '',
     accessKey: process.env.STORAGE_ACCESS_KEY ?? '',
     secretKey: process.env.STORAGE_SECRET_KEY ?? '',

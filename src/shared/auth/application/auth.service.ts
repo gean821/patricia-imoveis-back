@@ -16,7 +16,7 @@ export class AuthService {
     private readonly users: UserRepository,
     private readonly password: PasswordService,
     private readonly token: TokenService,
-  ) {}
+  ) { }
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.users.findByEmail(dto.email);

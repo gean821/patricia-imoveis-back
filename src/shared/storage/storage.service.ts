@@ -26,8 +26,8 @@ export class StorageService {
     this.bucket = config.getOrThrow<string>('storage.bucket');
     this.publicUrl = config.get<string>('storage.publicUrl') ?? '';
     this.s3 = new S3Client({
-      region: config.get<string>('storage.region') ?? 'auto',
-      endpoint: config.get<string>('storage.endpoint'),
+      region: config.getOrThrow<string>('storage.region'),
+      endpoint: config.getOrThrow<string>('storage.endpoint'),
       credentials: {
         accessKeyId: config.getOrThrow<string>('storage.accessKey'),
         secretAccessKey: config.getOrThrow<string>('storage.secretKey'),
