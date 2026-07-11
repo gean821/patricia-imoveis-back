@@ -80,6 +80,7 @@ export class ImovelListItemResponseDto {
   area: number;
   quartos: number | null;
   banheiros: number | null;
+  suites: number | null;
   vagas: number | null;
 
   fotoCapa: string | null;

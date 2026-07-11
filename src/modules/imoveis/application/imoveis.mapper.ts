@@ -103,6 +103,7 @@ export function mapImovelToListItem(imovel: ImovelListItem): ImovelListItemRespo
     area: imovel.area,
     quartos: imovel.quartos,
     banheiros: imovel.banheiros,
+    suites: imovel.suites,
     vagas: imovel.vagas,
     fotoCapa: capa?.url ?? null,
     fotoCapaLegenda: capa?.legenda ?? null,

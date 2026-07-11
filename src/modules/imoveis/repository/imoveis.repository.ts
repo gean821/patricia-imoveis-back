@@ -72,6 +72,7 @@ export const imovelListSelect = {
   area: true,
   quartos: true,
   banheiros: true,
+  suites: true,
   vagas: true,
   createdAt: true,
   fotos: {
