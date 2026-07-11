@@ -33,6 +33,17 @@ export class ImoveisPublicController {
     });
   }
 
+  @Get('lancamentos')
+  async lancamentos(
+    @Query() query: ListImoveisQueryDto,
+  ): Promise<PaginatedResponseDto<ImovelListItemResponseDto>> {
+    return await this.service.listPublic({
+      ...query,
+      isLancamento: true,
+      limit: query.limit ?? 6,
+    });
+  }
+
   @Get(':codigo')
   async findByCodigo(@Param('codigo') codigo: string): Promise<ImovelResponseDto> {
     return await this.service.findByCodigoPublic(codigo);

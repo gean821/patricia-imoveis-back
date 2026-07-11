@@ -13,6 +13,7 @@ import { InteracoesModule } from './modules/interacoes/interacoes.module';
 import { MatchingModule } from './modules/matching/matching.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
 import { FeedPortaisModule } from './modules/feed-portais/feed-portais.module';
+import { RelatoriosModule } from './modules/relatorios/relatorios.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -32,6 +33,7 @@ import configuration from './config/configuration';
     MatchingModule,
     UploadsModule,
     FeedPortaisModule,
+    RelatoriosModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

@@ -72,8 +72,9 @@ model Imovel {
   descricao   String?      @db.Text
   tipo        TipoImovel
   finalidade  Finalidade   @default(VENDA)
-  status      StatusImovel @default(DISPONIVEL)
-  destaque    Boolean      @default(false)
+  status       StatusImovel @default(DISPONIVEL)
+  destaque     Boolean      @default(false)
+  isLancamento Boolean      @default(false) @map("is_lancamento")
 
   // Localização
   endereco    String   @db.VarChar(255)
@@ -129,6 +130,7 @@ model Imovel {
   @@index([cidade, bairro])
   @@index([finalidade])
   @@index([destaque])
+  @@index([isLancamento])
   @@index([deletedAt])
   @@map("imoveis")
 }
@@ -179,6 +181,7 @@ model Cliente {
   @@index([nome])
   @@index([telefone])
   @@index([email])
+  @@index([origem])
   @@index([deletedAt])
   @@map("clientes")
 }

@@ -70,6 +70,10 @@ export class CreateImovelDto {
   @IsBoolean()
   destaque?: boolean;
 
+  @IsOptional()
+  @IsBoolean()
+  isLancamento?: boolean;
+
   @IsString() @IsNotEmpty() endereco: string;
   @IsOptional() @IsString() numero?: string;
   @IsOptional() @IsString() complemento?: string;
@@ -126,4 +130,5 @@ export class ListImoveisQueryDto extends BasePaginationQueryDto {
   @IsOptional() @Type(() => Number) @IsInt() quartosMin?: number;
   @IsOptional() @Type(() => Number) @IsInt() vagasMin?: number;
   @IsOptional() @Type(() => Boolean) @IsBoolean() destaque?: boolean;
+  @IsOptional() @Type(() => Boolean) @IsBoolean() isLancamento?: boolean;
 }
