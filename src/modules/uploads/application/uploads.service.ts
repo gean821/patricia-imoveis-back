@@ -17,7 +17,7 @@ const MAX_DOC = 25 * 1024 * 1024;
 
 @Injectable()
 export class UploadsService {
-  constructor(private readonly storage: StorageService) {}
+  constructor(private readonly storage: StorageService) { }
 
   async uploadFotoImovel(
     imovelId: string,
@@ -43,6 +43,18 @@ export class UploadsService {
   ): Promise<UploadFileResponseDto> {
     this.assertFile(file, ALLOWED_DOC_MIME, MAX_DOC);
     const result = await this.storage.upload(`imoveis/${imovelId}/plantas`, file);
+    return { key: result.key, url: result.url };
+  }
+
+  async uploadHeroImagem(file: Express.Multer.File): Promise<UploadFileResponseDto> {
+    this.assertFile(file, ALLOWED_IMAGE_MIME, MAX_IMAGE);
+    const result = await this.storage.upload('home/hero', file);
+    return { key: result.key, url: result.url };
+  }
+
+  async uploadVideoDestaque(file: Express.Multer.File): Promise<UploadFileResponseDto> {
+    this.assertFile(file, ALLOWED_VIDEO_MIME, MAX_VIDEO);
+    const result = await this.storage.upload('home/reels', file);
     return { key: result.key, url: result.url };
   }
 

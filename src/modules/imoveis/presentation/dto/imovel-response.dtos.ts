@@ -18,7 +18,6 @@ export class ImovelResponseDto {
   finalidade: Finalidade;
   status: StatusImovel;
   destaque: boolean;
-  isLancamento: boolean;
 
   endereco: string;
   numero: string | null;
@@ -72,7 +71,6 @@ export class ImovelListItemResponseDto {
   finalidade: Finalidade;
   status: StatusImovel;
   destaque: boolean;
-  isLancamento: boolean;
 
   bairro: string;
   cidade: string;

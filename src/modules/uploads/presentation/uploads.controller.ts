@@ -54,6 +54,24 @@ export class UploadsController {
     return await this.service.uploadPlantaImovel(imovelId, file);
   }
 
+  @Post('home/hero-imagem')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadHeroImagem(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<UploadFileResponseDto> {
+    return await this.service.uploadHeroImagem(file);
+  }
+
+  @Post('home/video-destaque')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadVideoDestaque(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<UploadFileResponseDto> {
+    return await this.service.uploadVideoDestaque(file);
+  }
+
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteFile(@Body() dto: DeleteFileDto): Promise<void> {

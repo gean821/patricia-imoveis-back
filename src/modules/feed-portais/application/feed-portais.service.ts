@@ -9,7 +9,6 @@ const TIPO_MAP: Record<TipoImovel, string> = {
   CASA: 'Casa',
   SOBRADO: 'Sobrado',
   COBERTURA: 'Cobertura',
-  KITNET: 'Kitnet',
   STUDIO: 'Studio',
   TERRENO: 'Terreno',
   CHACARA: 'Chácara',
@@ -18,6 +17,7 @@ const TIPO_MAP: Record<TipoImovel, string> = {
   COMERCIAL: 'Sala Comercial',
   GALPAO: 'Galpão',
   SALA: 'Sala',
+  CASA_DE_CONDOMINIO: 'Casa de Condomínio',
 };
 
 @Injectable()
@@ -152,6 +152,8 @@ export class FeedPortaisService {
         return 'For Rent';
       case 'AMBOS':
         return 'For Sale/Rent';
+      case 'LANCAMENTO':
+        return 'For Sale';
     }
   }
 }

@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "TipoImovel" ADD VALUE 'CASA_DE_CONDOMINIO';

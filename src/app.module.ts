@@ -14,6 +14,7 @@ import { MatchingModule } from './modules/matching/matching.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
 import { FeedPortaisModule } from './modules/feed-portais/feed-portais.module';
 import { RelatoriosModule } from './modules/relatorios/relatorios.module';
+import { HomeConteudoModule } from './modules/home-conteudo/home-conteudo.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -34,6 +35,7 @@ import configuration from './config/configuration';
     UploadsModule,
     FeedPortaisModule,
     RelatoriosModule,
+    HomeConteudoModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

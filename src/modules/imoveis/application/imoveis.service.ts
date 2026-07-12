@@ -170,9 +170,6 @@ export class ImoveisService {
     if (q.destaque !== undefined) {
       where.destaque = q.destaque;
     }
-    if (q.isLancamento !== undefined) {
-      where.isLancamento = q.isLancamento;
-    }
     if (q.quartosMin !== undefined) {
       where.quartos = { gte: q.quartosMin };
     }

@@ -39,7 +39,7 @@ export class ImoveisPublicController {
   ): Promise<PaginatedResponseDto<ImovelListItemResponseDto>> {
     return await this.service.listPublic({
       ...query,
-      isLancamento: true,
+      finalidade: 'LANCAMENTO',
       limit: query.limit ?? 6,
     });
   }

@@ -39,7 +39,6 @@ enum TipoImovel {
   CASA
   SOBRADO
   COBERTURA
-  KITNET
   STUDIO
   TERRENO
   CHACARA
@@ -48,12 +47,14 @@ enum TipoImovel {
   COMERCIAL
   GALPAO
   SALA
+  CASA_DE_CONDOMINIO
 }
 
 enum Finalidade {
   VENDA
   ALUGUEL
   AMBOS
+  LANCAMENTO
 }
 
 enum StatusImovel {
@@ -66,24 +67,23 @@ enum StatusImovel {
 }
 
 model Imovel {
-  id          String       @id @default(uuid()) @db.Uuid
-  codigo      String       @unique @db.VarChar(20)
-  titulo      String       @db.VarChar(255)
-  descricao   String?      @db.Text
-  tipo        TipoImovel
-  finalidade  Finalidade   @default(VENDA)
-  status       StatusImovel @default(DISPONIVEL)
-  destaque     Boolean      @default(false)
-  isLancamento Boolean      @default(false) @map("is_lancamento")
+  id           String       @id @default(uuid()) @db.Uuid
+  codigo       String       @unique @db.VarChar(20)
+  titulo       String       @db.VarChar(255)
+  descricao    String?      @db.Text
+  tipo         TipoImovel
+  finalidade   Finalidade   @default(VENDA)
+  status     StatusImovel @default(DISPONIVEL)
+  destaque   Boolean      @default(false)
 
   // Localização
-  endereco    String   @db.VarChar(255)
-  numero      String?  @db.VarChar(20)
-  complemento String?  @db.VarChar(100)
-  bairro      String   @db.VarChar(100)
-  cidade      String   @db.VarChar(100)
-  estado      String   @db.VarChar(2)
-  cep         String?  @db.VarChar(10)
+  endereco    String  @db.VarChar(255)
+  numero      String? @db.VarChar(20)
+  complemento String? @db.VarChar(100)
+  bairro      String  @db.VarChar(100)
+  cidade      String  @db.VarChar(100)
+  estado      String  @db.VarChar(2)
+  cep         String? @db.VarChar(10)
   latitude    Float?
   longitude   Float?
 
@@ -111,12 +111,12 @@ model Imovel {
   tourVirtualUrl String?      @map("tour_virtual_url") @db.Text
 
   // Portais (flags de publicação)
-  publicadoFeed         Boolean @default(true) @map("publicado_feed")
-  publicadoOlx          Boolean @default(false) @map("publicado_olx")
-  publicadoChavesNaMao  Boolean @default(false) @map("publicado_chaves_na_mao")
-  publicadoSub100       Boolean @default(false) @map("publicado_sub100")
-  publicadoZap          Boolean @default(false) @map("publicado_zap")
-  publicadoVivaReal     Boolean @default(false) @map("publicado_viva_real")
+  publicadoFeed        Boolean @default(true) @map("publicado_feed")
+  publicadoOlx         Boolean @default(false) @map("publicado_olx")
+  publicadoChavesNaMao Boolean @default(false) @map("publicado_chaves_na_mao")
+  publicadoSub100      Boolean @default(false) @map("publicado_sub100")
+  publicadoZap         Boolean @default(false) @map("publicado_zap")
+  publicadoVivaReal    Boolean @default(false) @map("publicado_viva_real")
 
   clientesInteressados ClienteImovel[]
   interacoes           Interacao[]
@@ -130,7 +130,6 @@ model Imovel {
   @@index([cidade, bairro])
   @@index([finalidade])
   @@index([destaque])
-  @@index([isLancamento])
   @@index([deletedAt])
   @@map("imoveis")
 }
@@ -150,7 +149,6 @@ model ImovelFoto {
   @@index([imovelId])
   @@map("imovel_fotos")
 }
-
 
 model Cliente {
   id          String  @id @default(uuid()) @db.Uuid
@@ -236,4 +234,29 @@ model Interacao {
   @@index([imovelId])
   @@index([data])
   @@map("interacoes")
+}
+
+model HeroImagem {
+  id         String   @id @default(uuid()) @db.Uuid
+  url        String   @db.Text
+  storageKey String   @map("storage_key") @db.Text
+  ordem      Int      @default(0)
+  ativo      Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([ativo])
+  @@map("hero_imagens")
+}
+
+model VideoDestaque {
+  id         String   @id @default(uuid()) @db.Uuid
+  titulo     String   @db.VarChar(255)
+  url        String   @db.Text
+  storageKey String   @map("storage_key") @db.Text
+  ordem      Int      @default(0)
+  ativo      Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([ativo])
+  @@map("videos_destaque")
 }
