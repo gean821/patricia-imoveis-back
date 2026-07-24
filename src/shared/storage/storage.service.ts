@@ -33,27 +33,32 @@ export class StorageService {
         secretAccessKey: config.getOrThrow<string>('storage.secretKey'),
       },
       forcePathStyle: false,
+      requestChecksumCalculation: 'WHEN_REQUIRED',
     });
   }
 
-  async upload(
+  buildKey(
     prefix: string,
-    file: Express.Multer.File,
-  ): Promise<UploadResult> {
-    const ext = extname(file.originalname).toLowerCase();
-    const key = `${prefix}/${randomUUID()}${ext}`;
+    originalFilename: string): string {
+    const ext = extname(originalFilename).toLowerCase();
+    return `${prefix}/${randomUUID()}${ext}`;
+  }
 
-    await this.s3.send(
+  async getSignedUploadUrl(
+    key: string,
+    contentType: string,
+    expiresIn = 900,
+  ): Promise<string> {
+    return await getSignedUrl(
+      this.s3,
       new PutObjectCommand({
         Bucket: this.bucket,
         Key: key,
-        Body: file.buffer,
-        ContentType: file.mimetype,
+        ContentType: contentType,
         CacheControl: 'public, max-age=31536000, immutable',
       }),
+      { expiresIn },
     );
-
-    return { key, url: this.buildPublicUrl(key) };
   }
 
   async delete(key: string): Promise<void> {
