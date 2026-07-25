@@ -57,6 +57,12 @@ const UPLOAD_RULES: Record<UploadTipo, UploadRule> = {
     requiresImovel: false,
     prefix: () => 'home/reels',
   },
+  [UploadTipo.VIDEO_DESTAQUE_CAPA]: {
+    allowed: ALLOWED_IMAGE_MIME,
+    maxSize: MAX_IMAGE,
+    requiresImovel: false,
+    prefix: () => 'home/reels-capas',
+  },
 };
 
 @Injectable()

@@ -37,6 +37,9 @@ export class VideosDestaqueService {
   async remove(id: string): Promise<void> {
     const entity = await this.findEntityById(id);
     await this.storage.delete(entity.storageKey);
+    if (entity.capaStorageKey) {
+      await this.storage.delete(entity.capaStorageKey);
+    }
     await this.repo.remove(id);
   }
 

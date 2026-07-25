@@ -20,6 +20,7 @@ export function mapVideoDestaqueToResponse(entity: VideoDestaqueDetailed): Video
     titulo: entity.titulo,
     url: entity.url,
     storageKey: entity.storageKey,
+    capaUrl: entity.capaUrl,
     ordem: entity.ordem,
     ativo: entity.ativo,
     createdAt: entity.createdAt,

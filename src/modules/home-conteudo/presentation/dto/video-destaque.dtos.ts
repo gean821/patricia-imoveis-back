@@ -17,6 +17,14 @@ export class CreateVideoDestaqueDto {
   storageKey: string;
 
   @IsOptional()
+  @IsString()
+  capaUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  capaStorageKey?: string;
+
+  @IsOptional()
   @IsInt()
   @Min(0)
   ordem?: number;

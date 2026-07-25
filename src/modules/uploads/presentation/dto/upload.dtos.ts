@@ -6,6 +6,7 @@ export enum UploadTipo {
   PLANTA_IMOVEL = 'PLANTA_IMOVEL',
   HERO_IMAGEM = 'HERO_IMAGEM',
   VIDEO_DESTAQUE = 'VIDEO_DESTAQUE',
+  VIDEO_DESTAQUE_CAPA = 'VIDEO_DESTAQUE_CAPA',
 }
 
 export class PresignUploadDto {

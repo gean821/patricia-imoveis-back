@@ -3,6 +3,7 @@ export class VideoDestaqueResponseDto {
   titulo: string;
   url: string;
   storageKey: string;
+  capaUrl: string | null;
   ordem: number;
   ativo: boolean;
   createdAt: Date;

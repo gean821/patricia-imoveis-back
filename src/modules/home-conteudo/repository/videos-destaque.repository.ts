@@ -7,6 +7,8 @@ export const videoDestaqueSelect = {
   titulo: true,
   url: true,
   storageKey: true,
+  capaUrl: true,
+  capaStorageKey: true,
   ordem: true,
   ativo: true,
   createdAt: true,
