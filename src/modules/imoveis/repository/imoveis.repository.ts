@@ -54,6 +54,17 @@ export const imovelDetailedSelect = {
       isCapa: true,
     },
   },
+  videos: {
+    orderBy: { ordem: 'asc' as const },
+    select: {
+      id: true,
+      url: true,
+      storageKey: true,
+      capaUrl: true,
+      capaStorageKey: true,
+      ordem: true,
+    },
+  },
   _count: { select: { clientesInteressados: true, interacoes: true } },
 } satisfies Prisma.ImovelSelect;
 

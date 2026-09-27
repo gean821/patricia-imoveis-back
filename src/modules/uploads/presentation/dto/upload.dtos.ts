@@ -3,6 +3,7 @@ import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Min } from 'cl
 export enum UploadTipo {
   FOTO_IMOVEL = 'FOTO_IMOVEL',
   VIDEO_IMOVEL = 'VIDEO_IMOVEL',
+  VIDEO_IMOVEL_CAPA = 'VIDEO_IMOVEL_CAPA',
   PLANTA_IMOVEL = 'PLANTA_IMOVEL',
   HERO_IMAGEM = 'HERO_IMAGEM',
   VIDEO_DESTAQUE = 'VIDEO_DESTAQUE',

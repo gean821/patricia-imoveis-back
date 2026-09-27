@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { ImoveisRepository, ImovelDetailed } from '../repository/imoveis.repository';
 import {
@@ -11,11 +11,17 @@ import {
   ImovelResponseDto,
 } from '../presentation/dto/imovel-response.dtos';
 import { PaginatedResponseDto } from '../../../shared/dto/paginated-response.dto';
+import { StorageService } from '../../../shared/storage/storage.service';
 import { mapImovelToListItem, mapImovelToResponse } from './imoveis.mapper';
 
 @Injectable()
 export class ImoveisService {
-  constructor(private readonly repo: ImoveisRepository) {}
+  private readonly logger = new Logger(ImoveisService.name);
+
+  constructor(
+    private readonly repo: ImoveisRepository,
+    private readonly storage: StorageService,
+  ) { }
 
   async create(dto: CreateImovelDto): Promise<ImovelResponseDto> {
     const data = this.buildCreateInput(dto);
@@ -54,9 +60,14 @@ export class ImoveisService {
   }
 
   async update(id: string, dto: UpdateImovelDto): Promise<ImovelResponseDto> {
-    await this.findEntityById(id);
+    const atual = await this.findEntityById(id);
     const data = this.buildUpdateInput(dto);
     const updated = await this.repo.update(id, data);
+
+    if (dto.fotos || dto.videos) {
+      await this.removeFilesFromExcludedMedia(atual, updated);
+    }
+
     return mapImovelToResponse(updated);
   }
 
@@ -101,8 +112,45 @@ export class ImoveisService {
     return imovel;
   }
 
+  private async removeFilesFromExcludedMedia(
+    antes: ImovelDetailed,
+    depois: ImovelDetailed,
+  ): Promise<void> {
+    const mantidas = new Set(this.mediaStorageKeys(depois));
+    const excluidas = this.mediaStorageKeys(antes).filter(
+      (key) => !mantidas.has(key),
+    );
+
+    for (const key of excluidas) {
+      try {
+        await this.storage.delete(key);
+      } catch (error) {
+        this.logger.warn(`Falha ao remover ${key} do storage: ${String(error)}`);
+      }
+    }
+  }
+
+  private mediaStorageKeys(imovel: ImovelDetailed): string[] {
+    return [
+      ...imovel.fotos.map((f) => f.storageKey),
+      ...imovel.videos.flatMap((v) => [v.storageKey, v.capaStorageKey]),
+    ].filter((key): key is string => Boolean(key));
+  }
+
+  private buildVideosCreate(
+    videos: NonNullable<CreateImovelDto['videos']>,
+  ): Prisma.ImovelVideoCreateWithoutImovelInput[] {
+    return videos.map((v, idx) => ({
+      url: v.url,
+      storageKey: v.storageKey,
+      capaUrl: v.capaUrl,
+      capaStorageKey: v.capaStorageKey,
+      ordem: v.ordem ?? idx,
+    }));
+  }
+
   private buildCreateInput(dto: CreateImovelDto): Prisma.ImovelCreateInput {
-    const { fotos, ...rest } = dto;
+    const { fotos, videos, ...rest } = dto;
     const data: Prisma.ImovelCreateInput = { ...rest };
 
     if (fotos?.length) {
@@ -117,11 +165,15 @@ export class ImoveisService {
       };
     }
 
+    if (videos?.length) {
+      data.videos = { create: this.buildVideosCreate(videos) };
+    }
+
     return data;
   }
 
   private buildUpdateInput(dto: UpdateImovelDto): Prisma.ImovelUpdateInput {
-    const { fotos, ...rest } = dto;
+    const { fotos, videos, ...rest } = dto;
     const data: Prisma.ImovelUpdateInput = { ...rest };
 
     if (fotos) {
@@ -134,6 +186,13 @@ export class ImoveisService {
           ordem: f.ordem ?? idx,
           isCapa: f.isCapa ?? idx === 0,
         })),
+      };
+    }
+
+    if (videos) {
+      data.videos = {
+        deleteMany: {},
+        create: this.buildVideosCreate(videos),
       };
     }
 

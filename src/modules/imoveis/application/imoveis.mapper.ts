@@ -3,6 +3,7 @@ import {
   ImovelFotoResponseDto,
   ImovelListItemResponseDto,
   ImovelResponseDto,
+  ImovelVideoResponseDto,
 } from '../presentation/dto/imovel-response.dtos';
 
 function decimalToNumber(value: unknown): number {
@@ -27,6 +28,17 @@ function mapFoto(foto: ImovelDetailed['fotos'][number]): ImovelFotoResponseDto {
     legenda: foto.legenda,
     ordem: foto.ordem,
     isCapa: foto.isCapa,
+  };
+}
+
+function mapVideo(video: ImovelDetailed['videos'][number]): ImovelVideoResponseDto {
+  return {
+    id: video.id,
+    url: video.url,
+    storageKey: video.storageKey,
+    capaUrl: video.capaUrl,
+    capaStorageKey: video.capaStorageKey,
+    ordem: video.ordem,
   };
 }
 
@@ -67,6 +79,7 @@ export function mapImovelToResponse(imovel: ImovelDetailed): ImovelResponseDto {
     caracteristicas: imovel.caracteristicas,
 
     fotos: imovel.fotos.map(mapFoto),
+    videos: imovel.videos.map(mapVideo),
     videoUrl: imovel.videoUrl,
     plantaUrl: imovel.plantaUrl,
     tourVirtualUrl: imovel.tourVirtualUrl,

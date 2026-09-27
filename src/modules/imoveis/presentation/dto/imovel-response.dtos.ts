@@ -9,6 +9,15 @@ export class ImovelFotoResponseDto {
   isCapa: boolean;
 }
 
+export class ImovelVideoResponseDto {
+  id: string;
+  url: string;
+  storageKey: string;
+  capaUrl: string | null;
+  capaStorageKey: string | null;
+  ordem: number;
+}
+
 export class ImovelResponseDto {
   id: string;
   codigo: string;
@@ -45,6 +54,7 @@ export class ImovelResponseDto {
   caracteristicas: string[];
 
   fotos: ImovelFotoResponseDto[];
+  videos: ImovelVideoResponseDto[];
   videoUrl: string | null;
   plantaUrl: string | null;
   tourVirtualUrl: string | null;

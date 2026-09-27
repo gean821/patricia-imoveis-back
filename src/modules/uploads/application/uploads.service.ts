@@ -39,6 +39,12 @@ const UPLOAD_RULES: Record<UploadTipo, UploadRule> = {
     requiresImovel: true,
     prefix: (imovelId) => `imoveis/${imovelId}/videos`,
   },
+  [UploadTipo.VIDEO_IMOVEL_CAPA]: {
+    allowed: ALLOWED_IMAGE_MIME,
+    maxSize: MAX_IMAGE,
+    requiresImovel: true,
+    prefix: (imovelId) => `imoveis/${imovelId}/videos-capas`,
+  },
   [UploadTipo.PLANTA_IMOVEL]: {
     allowed: ALLOWED_DOC_MIME,
     maxSize: MAX_DOC,

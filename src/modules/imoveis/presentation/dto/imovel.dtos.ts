@@ -41,6 +41,28 @@ export class FotoInputDto {
   isCapa?: boolean;
 }
 
+export class VideoInputDto {
+  @IsString()
+  @IsNotEmpty()
+  url: string;
+
+  @IsString()
+  @IsNotEmpty()
+  storageKey: string;
+
+  @IsOptional()
+  @IsString()
+  capaUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  capaStorageKey?: string;
+
+  @IsOptional()
+  @IsInt()
+  ordem?: number;
+}
+
 export class CreateImovelDto {
   @IsString()
   @IsNotEmpty()
@@ -104,6 +126,12 @@ export class CreateImovelDto {
   @ValidateNested({ each: true })
   @Type(() => FotoInputDto)
   fotos?: FotoInputDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => VideoInputDto)
+  videos?: VideoInputDto[];
 
   @IsOptional() @IsBoolean() publicadoFeed?: boolean;
   @IsOptional() @IsBoolean() publicadoOlx?: boolean;

@@ -67,12 +67,12 @@ enum StatusImovel {
 }
 
 model Imovel {
-  id           String       @id @default(uuid()) @db.Uuid
-  codigo       String       @unique @db.VarChar(20)
-  titulo       String       @db.VarChar(255)
-  descricao    String?      @db.Text
-  tipo         TipoImovel
-  finalidade   Finalidade   @default(VENDA)
+  id         String       @id @default(uuid()) @db.Uuid
+  codigo     String       @unique @db.VarChar(20)
+  titulo     String       @db.VarChar(255)
+  descricao  String?      @db.Text
+  tipo       TipoImovel
+  finalidade Finalidade   @default(VENDA)
   status     StatusImovel @default(DISPONIVEL)
   destaque   Boolean      @default(false)
 
@@ -106,9 +106,10 @@ model Imovel {
 
   // Mídia
   fotos          ImovelFoto[]
-  videoUrl       String?      @map("video_url") @db.Text
-  plantaUrl      String?      @map("planta_url") @db.Text
-  tourVirtualUrl String?      @map("tour_virtual_url") @db.Text
+  videos         ImovelVideo[]
+  videoUrl       String?       @map("video_url") @db.Text
+  plantaUrl      String?       @map("planta_url") @db.Text
+  tourVirtualUrl String?       @map("tour_virtual_url") @db.Text
 
   // Portais (flags de publicação)
   publicadoFeed        Boolean @default(true) @map("publicado_feed")
@@ -261,4 +262,20 @@ model VideoDestaque {
 
   @@index([ativo])
   @@map("videos_destaque")
+}
+
+model ImovelVideo {
+  id             String   @id @default(uuid()) @db.Uuid
+  imovelId       String   @map("imovel_id") @db.Uuid
+  url            String   @db.Text
+  storageKey     String   @map("storage_key") @db.Text
+  capaUrl        String?  @map("capa_url") @db.Text
+  capaStorageKey String?  @map("capa_storage_key") @db.Text
+  ordem          Int      @default(0)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  imovel Imovel @relation(fields: [imovelId], references: [id], onDelete: Cascade)
+
+  @@index([imovelId])
+  @@map("imovel_videos")
 }
