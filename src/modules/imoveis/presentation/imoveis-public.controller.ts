@@ -1,8 +1,13 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ImoveisService } from '../application/imoveis.service';
-import { ListImoveisQueryDto, ListImoveisSimilaresQueryDto } from './dto/imovel.dtos';
 import {
+  ListBairrosQueryDto,
+  ListImoveisQueryDto,
+  ListImoveisSimilaresQueryDto,
+} from './dto/imovel.dtos';
+import {
+  BairroResponseDto,
   ImovelListItemResponseDto,
   ImovelResponseDto,
 } from './dto/imovel-response.dtos';
@@ -42,6 +47,13 @@ export class ImoveisPublicController {
       finalidade: 'LANCAMENTO',
       limit: query.limit ?? 6,
     });
+  }
+
+  @Get('bairros')
+  async bairros(
+    @Query() query: ListBairrosQueryDto,
+  ): Promise<PaginatedResponseDto<BairroResponseDto>> {
+    return await this.service.listBairrosPublic(query);
   }
 
   @Get(':codigo/similares')

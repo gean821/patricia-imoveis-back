@@ -1,10 +1,12 @@
 import { ImovelDetailed, ImovelListItem } from '../repository/imoveis.repository';
 import {
+  BairroResponseDto,
   ImovelFotoResponseDto,
   ImovelListItemResponseDto,
   ImovelResponseDto,
   ImovelVideoResponseDto,
 } from '../presentation/dto/imovel-response.dtos';
+import { BairroAgrupado } from './bairro-slug';
 
 function decimalToNumber(value: unknown): number {
   if (value === null || value === undefined) {
@@ -122,4 +124,8 @@ export function mapImovelToListItem(imovel: ImovelListItem): ImovelListItemRespo
     fotoCapaLegenda: capa?.legenda ?? null,
     createdAt: imovel.createdAt,
   };
+}
+
+export function mapBairroToResponse(bairro: BairroAgrupado): BairroResponseDto {
+  return { slug: bairro.slug, nome: bairro.nome };
 }

@@ -121,6 +121,7 @@ model Imovel {
 
   clientesInteressados ClienteImovel[]
   interacoes           Interacao[]
+  contatoCliques       ContatoClique[]
 
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
@@ -235,6 +236,31 @@ model Interacao {
   @@index([imovelId])
   @@index([data])
   @@map("interacoes")
+}
+
+// =========================================================================
+// CLIQUES DE CONTATO NO SITE (anônimo — sem dado pessoal)
+// =========================================================================
+
+enum TipoContatoClique {
+  AGENDAR_VISITA
+  TIRAR_DUVIDA
+  LIGAR
+  WHATSAPP
+}
+
+model ContatoClique {
+  id        String            @id @default(uuid()) @db.Uuid
+  tipo      TipoContatoClique
+  origem    String            @db.VarChar(40) // onde foi o clique: imovel, imovel-barra, header, flutuante...
+  imovelId  String?           @map("imovel_id") @db.Uuid
+  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz()
+
+  imovel Imovel? @relation(fields: [imovelId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([imovelId, createdAt])
+  @@map("contato_cliques")
 }
 
 model HeroImagem {

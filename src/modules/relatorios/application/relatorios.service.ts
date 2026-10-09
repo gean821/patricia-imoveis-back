@@ -11,13 +11,14 @@ export class RelatoriosService {
   async dashboard(query: DashboardQueryDto): Promise<DashboardResponseDto> {
     const range = this.calcularPeriodo(query);
 
-    const [clientes, interacoes, statusImoveis] = await Promise.all([
+    const [clientes, interacoes, statusImoveis, cliques] = await Promise.all([
       this.repo.clientesNoPeriodo(range),
       this.repo.interacoesNoPeriodo(range),
       this.repo.statusImoveis(),
+      this.repo.cliquesNoPeriodo(range),
     ]);
 
-    return mapDashboard(range, clientes, interacoes, statusImoveis);
+    return mapDashboard(range, clientes, interacoes, statusImoveis, cliques);
   }
 
   private calcularPeriodo(query: DashboardQueryDto): PeriodoRange {

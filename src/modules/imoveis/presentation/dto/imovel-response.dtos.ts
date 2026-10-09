@@ -98,3 +98,8 @@ export class ImovelListItemResponseDto {
 
   createdAt: Date;
 }
+
+export class BairroResponseDto {
+  slug: string;
+  nome: string;
+}

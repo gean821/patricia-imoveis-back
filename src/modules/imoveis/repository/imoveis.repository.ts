@@ -164,6 +164,17 @@ export class ImoveisRepository {
     return { items, total };
   }
 
+  async countPorBairro(
+    where: Prisma.ImovelWhereInput,
+  ): Promise<{ bairro: string; total: number }[]> {
+    const grupos = await this.prisma.imovel.groupBy({
+      by: ['bairro'],
+      where,
+      _count: { _all: true },
+    });
+    return grupos.map((g) => ({ bairro: g.bairro, total: g._count._all }));
+  }
+
   async findSimilaresCandidatos(
     where: Prisma.ImovelWhereInput,
     take: number,

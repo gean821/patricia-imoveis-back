@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { StatusImovel, TipoInteracao } from '@prisma/client';
+import { StatusImovel, TipoContatoClique, TipoInteracao } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 
 export interface PeriodoRange {
@@ -17,6 +17,11 @@ export interface InteracaoNoPeriodo {
   tipo: TipoInteracao;
 }
 
+export interface CliqueNoPeriodo {
+  tipo: TipoContatoClique;
+  imovel: { codigo: string; titulo: string } | null;
+}
+
 @Injectable()
 export class RelatoriosRepository {
   constructor(private readonly prisma: PrismaService) { }
@@ -32,6 +37,13 @@ export class RelatoriosRepository {
     return await this.prisma.interacao.findMany({
       where: { data: { gte: range.inicio, lte: range.fim } },
       select: { data: true, tipo: true },
+    });
+  }
+
+  async cliquesNoPeriodo(range: PeriodoRange): Promise<CliqueNoPeriodo[]> {
+    return await this.prisma.contatoClique.findMany({
+      where: { createdAt: { gte: range.inicio, lte: range.fim } },
+      select: { tipo: true, imovel: { select: { codigo: true, titulo: true } } },
     });
   }
 

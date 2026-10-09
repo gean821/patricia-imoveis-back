@@ -1,4 +1,4 @@
-import { StatusImovel, TipoInteracao } from '@prisma/client';
+import { StatusImovel, TipoContatoClique, TipoInteracao } from '@prisma/client';
 
 export class PeriodoResumoDto {
   inicio: string;
@@ -35,6 +35,25 @@ export class SerieTemporalItemDto {
   negociosFechados: number;
 }
 
+export class ContatoPorTipoItemDto {
+  tipo: TipoContatoClique;
+  total: number;
+}
+
+export class ImovelMaisProcuradoItemDto {
+  codigo: string;
+  titulo: string;
+  contatos: number;
+  pedidosVisita: number;
+}
+
+export class ContatosSiteDto {
+  total: number;
+  pedidosVisita: number;
+  porTipo: ContatoPorTipoItemDto[];
+  imoveisMaisProcurados: ImovelMaisProcuradoItemDto[];
+}
+
 export class DashboardResponseDto {
   periodo: PeriodoResumoDto;
   resumo: ResumoDashboardDto;
@@ -42,4 +61,5 @@ export class DashboardResponseDto {
   funilInteracoes: FunilInteracaoItemDto[];
   imoveisPorStatus: ImoveisPorStatusItemDto[];
   serieTemporal: SerieTemporalItemDto[];
+  contatosSite: ContatosSiteDto;
 }

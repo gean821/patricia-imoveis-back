@@ -15,6 +15,8 @@ import { UploadsModule } from './modules/uploads/uploads.module';
 import { FeedPortaisModule } from './modules/feed-portais/feed-portais.module';
 import { RelatoriosModule } from './modules/relatorios/relatorios.module';
 import { HomeConteudoModule } from './modules/home-conteudo/home-conteudo.module';
+import { AlertasModule } from './modules/alertas/alertas.module';
+import { ContatoCliquesModule } from './modules/contato-cliques/contato-cliques.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -36,6 +38,8 @@ import configuration from './config/configuration';
     FeedPortaisModule,
     RelatoriosModule,
     HomeConteudoModule,
+    AlertasModule,
+    ContatoCliquesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

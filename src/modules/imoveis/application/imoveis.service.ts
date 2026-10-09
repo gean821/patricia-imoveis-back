@@ -4,16 +4,23 @@ import { ImoveisRepository, ImovelDetailed } from '../repository/imoveis.reposit
 import {
   CreateImovelDto,
   ListImoveisQueryDto,
+  ListBairrosQueryDto,
   ListImoveisSimilaresQueryDto,
   UpdateImovelDto,
 } from '../presentation/dto/imovel.dtos';
 import {
+  BairroResponseDto,
   ImovelListItemResponseDto,
   ImovelResponseDto,
 } from '../presentation/dto/imovel-response.dtos';
 import { PaginatedResponseDto } from '../../../shared/dto/paginated-response.dto';
 import { StorageService } from '../../../shared/storage/storage.service';
-import { mapImovelToListItem, mapImovelToResponse } from './imoveis.mapper';
+import {
+  mapBairroToResponse,
+  mapImovelToListItem,
+  mapImovelToResponse,
+} from './imoveis.mapper';
+import { agruparBairros, slugBairro } from './bairro-slug';
 import {
   FAIXA_VALOR_CANDIDATOS,
   finalidadesCompativeis,
@@ -91,6 +98,10 @@ export class ImoveisService {
     const limit = query.limit ?? 20;
     const where = this.buildWhere(query);
 
+    if (query.bairroSlug) {
+      where.bairro = { in: await this.resolverVariantesBairro(query.bairroSlug) };
+    }
+
     const { items, total } = await this.repo.findManyWithTotal({
       skip: (page - 1) * limit,
       take: limit,
@@ -108,6 +119,26 @@ export class ImoveisService {
       ...query,
       status: query.status ?? 'DISPONIVEL',
     });
+  }
+
+  async listBairrosPublic(
+    query: ListBairrosQueryDto,
+  ): Promise<PaginatedResponseDto<BairroResponseDto>> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 100;
+    const bairros = agruparBairros(
+      await this.repo.countPorBairro({ deletedAt: null, status: 'DISPONIVEL' }),
+    );
+    const busca = query.search ? slugBairro(query.search) : '';
+    const filtrados = busca ? bairros.filter((b) => b.slug.includes(busca)) : bairros;
+    const pagina = filtrados.slice((page - 1) * limit, page * limit);
+
+    return new PaginatedResponseDto(
+      pagina.map(mapBairroToResponse),
+      filtrados.length,
+      page,
+      limit,
+    );
   }
 
   async listSimilaresPublic(
@@ -135,6 +166,12 @@ export class ImoveisService {
       page,
       limit,
     );
+  }
+
+  /** Slug → todas as grafias cadastradas do bairro. Slug desconhecido → [] (lista vazia). */
+  private async resolverVariantesBairro(slug: string): Promise<string[]> {
+    const bairros = agruparBairros(await this.repo.countPorBairro({ deletedAt: null }));
+    return bairros.find((b) => b.slug === slug)?.variantes ?? [];
   }
 
   private async findEntityById(id: string): Promise<ImovelDetailed> {

@@ -12,6 +12,7 @@ import {
   IsString,
   Length,
   Max,
+  MaxLength,
   Min,
   MinLength,
   ValidateNested,
@@ -155,6 +156,16 @@ export class ListImoveisQueryDto extends BasePaginationQueryDto {
   @IsOptional() @Type(() => Number) @IsInt() quartosMin?: number;
   @IsOptional() @Type(() => Number) @IsInt() vagasMin?: number;
   @IsOptional() @Type(() => Boolean) @IsBoolean() destaque?: boolean;
+  @IsOptional() @IsString() @MaxLength(100) bairroSlug?: string;
+}
+
+export class ListBairrosQueryDto extends BasePaginationQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number = 100;
 }
 
 export class ListImoveisSimilaresQueryDto extends BasePaginationQueryDto {

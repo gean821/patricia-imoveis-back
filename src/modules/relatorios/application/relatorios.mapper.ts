@@ -1,11 +1,14 @@
-import { StatusImovel, TipoInteracao } from '@prisma/client';
+import { StatusImovel, TipoContatoClique, TipoInteracao } from '@prisma/client';
 import {
   ClienteNoPeriodo,
+  CliqueNoPeriodo,
   InteracaoNoPeriodo,
   PeriodoRange,
 } from '../repository/relatorios.repository';
 import {
+  ContatosSiteDto,
   DashboardResponseDto,
+  ImovelMaisProcuradoItemDto,
   FunilInteracaoItemDto,
   ImoveisPorStatusItemDto,
   LeadsPorOrigemItemDto,
@@ -123,11 +126,48 @@ export function mapSerieTemporal(
   return Array.from(buckets.values()).sort((a, b) => a.data.localeCompare(b.data));
 }
 
+const ORDEM_CONTATO: TipoContatoClique[] = ['AGENDAR_VISITA', 'TIRAR_DUVIDA', 'LIGAR', 'WHATSAPP'];
+const LIMITE_IMOVEIS_MAIS_PROCURADOS = 5;
+
+export function mapContatosSite(cliques: CliqueNoPeriodo[]): ContatosSiteDto {
+  const porTipo = new Map<TipoContatoClique, number>();
+  const porImovel = new Map<string, ImovelMaisProcuradoItemDto>();
+
+  for (const clique of cliques) {
+    porTipo.set(clique.tipo, (porTipo.get(clique.tipo) ?? 0) + 1);
+
+    if (!clique.imovel) {
+      continue;
+    }
+    const item = porImovel.get(clique.imovel.codigo) ?? {
+      codigo: clique.imovel.codigo,
+      titulo: clique.imovel.titulo,
+      contatos: 0,
+      pedidosVisita: 0,
+    };
+    item.contatos += 1;
+    if (clique.tipo === 'AGENDAR_VISITA') {
+      item.pedidosVisita += 1;
+    }
+    porImovel.set(item.codigo, item);
+  }
+
+  return {
+    total: cliques.length,
+    pedidosVisita: porTipo.get('AGENDAR_VISITA') ?? 0,
+    porTipo: ORDEM_CONTATO.map((tipo) => ({ tipo, total: porTipo.get(tipo) ?? 0 })),
+    imoveisMaisProcurados: Array.from(porImovel.values())
+      .sort((a, b) => b.contatos - a.contatos || b.pedidosVisita - a.pedidosVisita)
+      .slice(0, LIMITE_IMOVEIS_MAIS_PROCURADOS),
+  };
+}
+
 export function mapDashboard(
   range: PeriodoRange,
   clientes: ClienteNoPeriodo[],
   interacoes: InteracaoNoPeriodo[],
   statusImoveis: StatusImovel[],
+  cliques: CliqueNoPeriodo[],
 ): DashboardResponseDto {
   const totalVisitasRealizadas = interacoes.filter((i) => i.tipo === 'VISITA_REALIZADA').length;
   const totalNegociosFechados = interacoes.filter((i) => i.tipo === 'NEGOCIO_FECHADO').length;
@@ -150,5 +190,6 @@ export function mapDashboard(
     funilInteracoes: mapFunilInteracoes(interacoes),
     imoveisPorStatus: mapImoveisPorStatus(statusImoveis),
     serieTemporal: mapSerieTemporal(range, clientes, interacoes),
+    contatosSite: mapContatosSite(cliques),
   };
 }
