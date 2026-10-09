@@ -93,8 +93,16 @@ export const imovelListSelect = {
   },
 } satisfies Prisma.ImovelSelect;
 
+export const imovelSimilarSelect = {
+  ...imovelListSelect,
+  caracteristicas: true,
+} satisfies Prisma.ImovelSelect;
+
 export type ImovelDetailed = Prisma.ImovelGetPayload<{ select: typeof imovelDetailedSelect }>;
 export type ImovelListItem = Prisma.ImovelGetPayload<{ select: typeof imovelListSelect }>;
+export type ImovelSimilarCandidato = Prisma.ImovelGetPayload<{
+  select: typeof imovelSimilarSelect;
+}>;
 
 interface FindManyArgs {
   skip: number;
@@ -154,6 +162,18 @@ export class ImoveisRepository {
     ]);
 
     return { items, total };
+  }
+
+  async findSimilaresCandidatos(
+    where: Prisma.ImovelWhereInput,
+    take: number,
+  ): Promise<ImovelSimilarCandidato[]> {
+    return await this.prisma.imovel.findMany({
+      where,
+      take,
+      orderBy: [{ destaque: 'desc' }, { createdAt: 'desc' }],
+      select: imovelSimilarSelect,
+    });
   }
 
   async findAllForFeed(): Promise<ImovelDetailed[]> {

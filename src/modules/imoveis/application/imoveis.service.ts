@@ -4,6 +4,7 @@ import { ImoveisRepository, ImovelDetailed } from '../repository/imoveis.reposit
 import {
   CreateImovelDto,
   ListImoveisQueryDto,
+  ListImoveisSimilaresQueryDto,
   UpdateImovelDto,
 } from '../presentation/dto/imovel.dtos';
 import {
@@ -13,6 +14,13 @@ import {
 import { PaginatedResponseDto } from '../../../shared/dto/paginated-response.dto';
 import { StorageService } from '../../../shared/storage/storage.service';
 import { mapImovelToListItem, mapImovelToResponse } from './imoveis.mapper';
+import {
+  FAIXA_VALOR_CANDIDATOS,
+  finalidadesCompativeis,
+  ranquearSimilares,
+} from './imoveis-similaridade';
+
+const MAX_CANDIDATOS_SIMILARES = 60;
 
 @Injectable()
 export class ImoveisService {
@@ -100,6 +108,33 @@ export class ImoveisService {
       ...query,
       status: query.status ?? 'DISPONIVEL',
     });
+  }
+
+  async listSimilaresPublic(
+    codigo: string,
+    query: ListImoveisSimilaresQueryDto,
+  ): Promise<PaginatedResponseDto<ImovelListItemResponseDto>> {
+    const referencia = await this.repo.findByCodigo(codigo);
+
+    if (!referencia) {
+      throw new NotFoundException('Imóvel não encontrado');
+    }
+
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 6;
+    const candidatos = await this.repo.findSimilaresCandidatos(
+      this.buildSimilaresWhere(referencia),
+      MAX_CANDIDATOS_SIMILARES,
+    );
+    const ranqueados = ranquearSimilares(referencia, candidatos);
+    const pagina = ranqueados.slice((page - 1) * limit, page * limit);
+
+    return new PaginatedResponseDto(
+      pagina.map(mapImovelToListItem),
+      ranqueados.length,
+      page,
+      limit,
+    );
   }
 
   private async findEntityById(id: string): Promise<ImovelDetailed> {
@@ -197,6 +232,33 @@ export class ImoveisService {
     }
 
     return data;
+  }
+
+  /**
+   * Pré-filtro no banco: mesma cidade, finalidade compatível e parecido em
+   * pelo menos tipo, bairro ou faixa de preço. O ranking fino é em memória
+   * (`ranquearSimilares`) — o catálogo de Maringá é pequeno.
+   */
+  private buildSimilaresWhere(referencia: ImovelDetailed): Prisma.ImovelWhereInput {
+    const valor = referencia.valor.toNumber();
+
+    return {
+      deletedAt: null,
+      status: 'DISPONIVEL',
+      id: { not: referencia.id },
+      cidade: { equals: referencia.cidade, mode: 'insensitive' },
+      finalidade: { in: finalidadesCompativeis(referencia.finalidade) },
+      OR: [
+        { tipo: referencia.tipo },
+        { bairro: { equals: referencia.bairro, mode: 'insensitive' } },
+        {
+          valor: {
+            gte: valor * FAIXA_VALOR_CANDIDATOS.min,
+            lte: valor * FAIXA_VALOR_CANDIDATOS.max,
+          },
+        },
+      ],
+    };
   }
 
   private buildWhere(q: ListImoveisQueryDto): Prisma.ImovelWhereInput {

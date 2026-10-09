@@ -11,6 +11,7 @@ import {
   IsOptional,
   IsString,
   Length,
+  Max,
   Min,
   MinLength,
   ValidateNested,
@@ -154,4 +155,13 @@ export class ListImoveisQueryDto extends BasePaginationQueryDto {
   @IsOptional() @Type(() => Number) @IsInt() quartosMin?: number;
   @IsOptional() @Type(() => Number) @IsInt() vagasMin?: number;
   @IsOptional() @Type(() => Boolean) @IsBoolean() destaque?: boolean;
+}
+
+export class ListImoveisSimilaresQueryDto extends BasePaginationQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  limit?: number = 6;
 }
