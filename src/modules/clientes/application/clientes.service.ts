@@ -23,7 +23,7 @@ import {
 
 @Injectable()
 export class ClientesService {
-  constructor(private readonly repo: ClientesRepository) {}
+  constructor(private readonly repo: ClientesRepository) { }
 
   async create(dto: CreateClienteDto): Promise<ClienteResponseDto> {
     const created = await this.repo.create(dto as unknown as Prisma.ClienteCreateInput);
@@ -54,7 +54,7 @@ export class ClientesService {
   ): Promise<PaginatedResponseDto<ClienteListItemResponseDto>> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
-    const where = this.buildWhere(query);
+    const where = await this.buildWhere(query);
 
     const { items, total } = await this.repo.findManyWithTotal({
       skip: (page - 1) * limit,
@@ -92,22 +92,33 @@ export class ClientesService {
     return cliente;
   }
 
-  private buildWhere(query: ListClientesQueryDto): Prisma.ClienteWhereInput {
+  private async buildWhere(query: ListClientesQueryDto): Promise<Prisma.ClienteWhereInput> {
     const where: Prisma.ClienteWhereInput = { deletedAt: null };
+    const filtrosTexto: Prisma.ClienteWhereInput[] = [];
 
     if (query.search) {
-      where.OR = [
-        { nome: { contains: query.search, mode: 'insensitive' } },
-        { telefone: { contains: query.search } },
-        { email: { contains: query.search, mode: 'insensitive' } },
-        { cpf: { contains: query.search } },
-      ];
+      const ids = await this.repo.findIdsPorTexto(['nome', 'email'], query.search, 'contem');
+      filtrosTexto.push({
+        OR: [
+          { id: { in: ids } },
+          { telefone: { contains: query.search } },
+          { cpf: { contains: query.search } },
+        ],
+      });
     }
     if (query.tipoDesejado) {
       where.tipoDesejado = { has: query.tipoDesejado };
     }
     if (query.cidadeDesejada) {
-      where.cidadeDesejada = { contains: query.cidadeDesejada, mode: 'insensitive' };
+      const ids = await this.repo.findIdsPorTexto(
+        ['cidadeDesejada'],
+        query.cidadeDesejada,
+        'contem',
+      );
+      filtrosTexto.push({ id: { in: ids } });
+    }
+    if (filtrosTexto.length > 0) {
+      where.AND = filtrosTexto;
     }
 
     return where;

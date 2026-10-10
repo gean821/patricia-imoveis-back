@@ -27,7 +27,7 @@ export class MatchingService {
 
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
-    const where = this.buildImoveisWhere(prefs);
+    const where = await this.buildImoveisWhere(prefs);
 
     const { items, total } = await this.repo.findMatchingImoveis({
       skip: (page - 1) * limit,
@@ -46,7 +46,7 @@ export class MatchingService {
 
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
-    const where = this.buildClientesWhere(imovel);
+    const where = await this.buildClientesWhere(imovel);
 
     const { items, total } = await this.repo.findMatchingClientes({
       skip: (page - 1) * limit,
@@ -77,11 +77,12 @@ export class MatchingService {
     return imovel;
   }
 
-  private buildImoveisWhere(prefs: ClienteMatchPrefs): Prisma.ImovelWhereInput {
+  private async buildImoveisWhere(prefs: ClienteMatchPrefs): Promise<Prisma.ImovelWhereInput> {
     const where: Prisma.ImovelWhereInput = {
       deletedAt: null,
       status: 'DISPONIVEL',
     };
+    const filtrosTexto: Prisma.ImovelWhereInput[] = [];
 
     if (prefs.tipoDesejado.length > 0) {
       where.tipo = { in: prefs.tipoDesejado };
@@ -90,10 +91,15 @@ export class MatchingService {
       where.OR = [{ finalidade: prefs.finalidadeDesejada }, { finalidade: 'AMBOS' }];
     }
     if (prefs.cidadeDesejada) {
-      where.cidade = { contains: prefs.cidadeDesejada, mode: 'insensitive' };
+      const ids = await this.repo.findImovelIdsPorTexto(['cidade'], prefs.cidadeDesejada, 'contem');
+      filtrosTexto.push({ id: { in: ids } });
     }
     if (prefs.bairroDesejado) {
-      where.bairro = { contains: prefs.bairroDesejado, mode: 'insensitive' };
+      const ids = await this.repo.findImovelIdsPorTexto(['bairro'], prefs.bairroDesejado, 'contem');
+      filtrosTexto.push({ id: { in: ids } });
+    }
+    if (filtrosTexto.length > 0) {
+      where.AND = filtrosTexto;
     }
     if (prefs.valorMin || prefs.valorMax) {
       where.valor = {};
@@ -114,15 +120,15 @@ export class MatchingService {
     return where;
   }
 
-  private buildClientesWhere(imovel: ImovelMatchKeys): Prisma.ClienteWhereInput {
+  private async buildClientesWhere(imovel: ImovelMatchKeys): Promise<Prisma.ClienteWhereInput> {
+    const idsMesmaCidade = await this.repo.findClienteIdsPorTexto(
+      ['cidadeDesejada'],
+      imovel.cidade,
+      'igual',
+    );
     const conditions: Prisma.ClienteWhereInput[] = [
       { OR: [{ tipoDesejado: { has: imovel.tipo } }, { tipoDesejado: { isEmpty: true } }] },
-      {
-        OR: [
-          { cidadeDesejada: null },
-          { cidadeDesejada: { equals: imovel.cidade, mode: 'insensitive' } },
-        ],
-      },
+      { OR: [{ cidadeDesejada: null }, { id: { in: idsMesmaCidade } }] },
       { OR: [{ valorMin: null }, { valorMin: { lte: imovel.valor } }] },
       { OR: [{ valorMax: null }, { valorMax: { gte: imovel.valor } }] },
     ];

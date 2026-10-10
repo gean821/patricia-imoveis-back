@@ -2,10 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import {
+  findIdsPorTextoSemAcento,
+  ModoBuscaTexto,
+} from '../../../shared/prisma/busca-sem-acento';
+import {
+  ImovelColunaTexto,
   ImovelListItem,
   imovelListSelect,
 } from '../../imoveis/repository/imoveis.repository';
 import {
+  ClienteColunaTexto,
+  clienteColunasTexto,
   ClienteListItem,
   clienteListSelect,
 } from '../../clientes/repository/clientes.repository';
@@ -51,6 +58,27 @@ interface FindClientesArgs {
 @Injectable()
 export class MatchingRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async findImovelIdsPorTexto(
+    colunas: readonly ImovelColunaTexto[],
+    termo: string,
+    modo: ModoBuscaTexto,
+  ): Promise<string[]> {
+    return await findIdsPorTextoSemAcento(this.prisma, { tabela: 'imoveis', colunas, termo, modo });
+  }
+
+  async findClienteIdsPorTexto(
+    colunas: readonly ClienteColunaTexto[],
+    termo: string,
+    modo: ModoBuscaTexto,
+  ): Promise<string[]> {
+    return await findIdsPorTextoSemAcento(this.prisma, {
+      tabela: 'clientes',
+      colunas: colunas.map((c) => clienteColunasTexto[c]),
+      termo,
+      modo,
+    });
+  }
 
   async findClientePrefs(id: string): Promise<ClienteMatchPrefs | null> {
     return await this.prisma.cliente.findFirst({

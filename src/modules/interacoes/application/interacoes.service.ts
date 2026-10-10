@@ -67,7 +67,7 @@ export class InteracoesService {
   ): Promise<PaginatedResponseDto<InteracaoResponseDto>> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
-    const where = this.buildWhere(query);
+    const where = await this.buildWhere(query);
 
     const { items, total } = await this.repo.findManyWithTotal({
       skip: (page - 1) * limit,
@@ -101,7 +101,7 @@ export class InteracoesService {
     return interacao;
   }
 
-  private buildWhere(query: ListInteracoesQueryDto): Prisma.InteracaoWhereInput {
+  private async buildWhere(query: ListInteracoesQueryDto): Promise<Prisma.InteracaoWhereInput> {
     const where: Prisma.InteracaoWhereInput = {};
 
     if (query.clienteId) {
@@ -114,10 +114,9 @@ export class InteracoesService {
       where.tipo = query.tipo;
     }
     if (query.search) {
-      where.OR = [
-        { titulo: { contains: query.search, mode: 'insensitive' } },
-        { descricao: { contains: query.search, mode: 'insensitive' } },
-      ];
+      where.id = {
+        in: await this.repo.findIdsPorTexto(['titulo', 'descricao'], query.search, 'contem'),
+      };
     }
 
     return where;

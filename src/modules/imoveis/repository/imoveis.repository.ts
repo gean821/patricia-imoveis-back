@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
+import {
+  findIdsPorTextoSemAcento,
+  ModoBuscaTexto,
+} from '../../../shared/prisma/busca-sem-acento';
 
 export const imovelDetailedSelect = {
   id: true,
@@ -104,6 +108,8 @@ export type ImovelSimilarCandidato = Prisma.ImovelGetPayload<{
   select: typeof imovelSimilarSelect;
 }>;
 
+export type ImovelColunaTexto = 'titulo' | 'codigo' | 'bairro' | 'cidade' | 'descricao';
+
 interface FindManyArgs {
   skip: number;
   take: number;
@@ -113,7 +119,15 @@ interface FindManyArgs {
 
 @Injectable()
 export class ImoveisRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
+
+  async findIdsPorTexto(
+    colunas: readonly ImovelColunaTexto[],
+    termo: string,
+    modo: ModoBuscaTexto,
+  ): Promise<string[]> {
+    return await findIdsPorTextoSemAcento(this.prisma, { tabela: 'imoveis', colunas, termo, modo });
+  }
 
   async create(data: Prisma.ImovelCreateInput): Promise<ImovelDetailed> {
     return await this.prisma.imovel.create({ data, select: imovelDetailedSelect });

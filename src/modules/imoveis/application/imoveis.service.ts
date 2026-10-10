@@ -96,7 +96,7 @@ export class ImoveisService {
   ): Promise<PaginatedResponseDto<ImovelListItemResponseDto>> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
-    const where = this.buildWhere(query);
+    const where = await this.buildWhere(query);
 
     if (query.bairroSlug) {
       where.bairro = { in: await this.resolverVariantesBairro(query.bairroSlug) };
@@ -154,7 +154,7 @@ export class ImoveisService {
     const page = query.page ?? 1;
     const limit = query.limit ?? 6;
     const candidatos = await this.repo.findSimilaresCandidatos(
-      this.buildSimilaresWhere(referencia),
+      await this.buildSimilaresWhere(referencia),
       MAX_CANDIDATOS_SIMILARES,
     );
     const ranqueados = ranquearSimilares(referencia, candidatos);
@@ -276,18 +276,21 @@ export class ImoveisService {
    * pelo menos tipo, bairro ou faixa de preço. O ranking fino é em memória
    * (`ranquearSimilares`) — o catálogo de Maringá é pequeno.
    */
-  private buildSimilaresWhere(referencia: ImovelDetailed): Prisma.ImovelWhereInput {
+  private async buildSimilaresWhere(referencia: ImovelDetailed): Promise<Prisma.ImovelWhereInput> {
     const valor = referencia.valor.toNumber();
+    const [idsMesmaCidade, idsMesmoBairro] = await Promise.all([
+      this.repo.findIdsPorTexto(['cidade'], referencia.cidade, 'igual'),
+      this.repo.findIdsPorTexto(['bairro'], referencia.bairro, 'igual'),
+    ]);
 
     return {
       deletedAt: null,
       status: 'DISPONIVEL',
-      id: { not: referencia.id },
-      cidade: { equals: referencia.cidade, mode: 'insensitive' },
+      id: { in: idsMesmaCidade, not: referencia.id },
       finalidade: { in: finalidadesCompativeis(referencia.finalidade) },
       OR: [
         { tipo: referencia.tipo },
-        { bairro: { equals: referencia.bairro, mode: 'insensitive' } },
+        { id: { in: idsMesmoBairro } },
         {
           valor: {
             gte: valor * FAIXA_VALOR_CANDIDATOS.min,
@@ -298,17 +301,29 @@ export class ImoveisService {
     };
   }
 
-  private buildWhere(q: ListImoveisQueryDto): Prisma.ImovelWhereInput {
+  /** Filtros de texto ignoram acento ("Maringa" acha "Maringá") — ver `findIdsPorTexto`. */
+  private async buildWhere(q: ListImoveisQueryDto): Promise<Prisma.ImovelWhereInput> {
     const where: Prisma.ImovelWhereInput = { deletedAt: null };
+    const filtrosTexto: Prisma.ImovelWhereInput[] = [];
 
     if (q.search) {
-      where.OR = [
-        { titulo: { contains: q.search, mode: 'insensitive' } },
-        { codigo: { contains: q.search, mode: 'insensitive' } },
-        { bairro: { contains: q.search, mode: 'insensitive' } },
-        { cidade: { contains: q.search, mode: 'insensitive' } },
-        { descricao: { contains: q.search, mode: 'insensitive' } },
-      ];
+      const ids = await this.repo.findIdsPorTexto(
+        ['titulo', 'codigo', 'bairro', 'cidade', 'descricao'],
+        q.search,
+        'contem',
+      );
+      filtrosTexto.push({ id: { in: ids } });
+    }
+    if (q.cidade) {
+      const ids = await this.repo.findIdsPorTexto(['cidade'], q.cidade, 'contem');
+      filtrosTexto.push({ id: { in: ids } });
+    }
+    if (q.bairro) {
+      const ids = await this.repo.findIdsPorTexto(['bairro'], q.bairro, 'contem');
+      filtrosTexto.push({ id: { in: ids } });
+    }
+    if (filtrosTexto.length > 0) {
+      where.AND = filtrosTexto;
     }
     if (q.tipo) {
       where.tipo = q.tipo;
@@ -318,12 +333,6 @@ export class ImoveisService {
     }
     if (q.status) {
       where.status = q.status;
-    }
-    if (q.cidade) {
-      where.cidade = { contains: q.cidade, mode: 'insensitive' };
-    }
-    if (q.bairro) {
-      where.bairro = { contains: q.bairro, mode: 'insensitive' };
     }
     if (q.destaque !== undefined) {
       where.destaque = q.destaque;

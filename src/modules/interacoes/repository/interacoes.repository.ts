@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Interacao, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
+import {
+  findIdsPorTextoSemAcento,
+  ModoBuscaTexto,
+} from '../../../shared/prisma/busca-sem-acento';
 
 export const interacaoSelect = {
   id: true,
@@ -21,6 +25,8 @@ export const interacaoSelect = {
 
 export type InteracaoDetailed = Prisma.InteracaoGetPayload<{ select: typeof interacaoSelect }>;
 
+export type InteracaoColunaTexto = 'titulo' | 'descricao';
+
 interface FindManyArgs {
   skip: number;
   take: number;
@@ -29,7 +35,20 @@ interface FindManyArgs {
 
 @Injectable()
 export class InteracoesRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
+
+  async findIdsPorTexto(
+    colunas: readonly InteracaoColunaTexto[],
+    termo: string,
+    modo: ModoBuscaTexto,
+  ): Promise<string[]> {
+    return await findIdsPorTextoSemAcento(this.prisma, {
+      tabela: 'interacoes',
+      colunas,
+      termo,
+      modo,
+    });
+  }
 
   async create(data: Prisma.InteracaoCreateInput): Promise<InteracaoDetailed> {
     return await this.prisma.interacao.create({ data, select: interacaoSelect });

@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ClienteImovel, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
+import {
+  findIdsPorTextoSemAcento,
+  ModoBuscaTexto,
+} from '../../../shared/prisma/busca-sem-acento';
 
 export const clienteDetailedSelect = {
   id: true,
@@ -58,6 +62,15 @@ export const clienteListSelect = {
 export type ClienteDetailed = Prisma.ClienteGetPayload<{ select: typeof clienteDetailedSelect }>;
 export type ClienteListItem = Prisma.ClienteGetPayload<{ select: typeof clienteListSelect }>;
 
+export const clienteColunasTexto = {
+  nome: 'nome',
+  email: 'email',
+  cidadeDesejada: 'cidade_desejada',
+  bairroDesejado: 'bairro_desejado',
+} as const;
+
+export type ClienteColunaTexto = keyof typeof clienteColunasTexto;
+
 interface FindManyArgs {
   skip: number;
   take: number;
@@ -67,7 +80,20 @@ interface FindManyArgs {
 
 @Injectable()
 export class ClientesRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
+
+  async findIdsPorTexto(
+    colunas: readonly ClienteColunaTexto[],
+    termo: string,
+    modo: ModoBuscaTexto,
+  ): Promise<string[]> {
+    return await findIdsPorTextoSemAcento(this.prisma, {
+      tabela: 'clientes',
+      colunas: colunas.map((c) => clienteColunasTexto[c]),
+      termo,
+      modo,
+    });
+  }
 
   async create(data: Prisma.ClienteCreateInput): Promise<ClienteDetailed> {
     return await this.prisma.cliente.create({ data, select: clienteDetailedSelect });
