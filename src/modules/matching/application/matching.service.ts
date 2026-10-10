@@ -12,6 +12,7 @@ import {
 import { ImovelListItemResponseDto } from '../../imoveis/presentation/dto/imovel-response.dtos';
 import { ClienteListItemResponseDto } from '../../clientes/presentation/dto/cliente-response.dtos';
 import { mapImovelToListItem } from '../../imoveis/application/imoveis.mapper';
+import { finalidadesCompativeis } from '../../imoveis/application/imoveis-similaridade';
 import { mapClienteToListItem } from '../../clientes/application/clientes.mapper';
 import { PaginatedResponseDto } from '../../../shared/dto/paginated-response.dto';
 
@@ -88,7 +89,7 @@ export class MatchingService {
       where.tipo = { in: prefs.tipoDesejado };
     }
     if (prefs.finalidadeDesejada) {
-      where.OR = [{ finalidade: prefs.finalidadeDesejada }, { finalidade: 'AMBOS' }];
+      where.finalidade = { in: finalidadesCompativeis(prefs.finalidadeDesejada) };
     }
     if (prefs.cidadeDesejada) {
       const ids = await this.repo.findImovelIdsPorTexto(['cidade'], prefs.cidadeDesejada, 'contem');

@@ -329,13 +329,17 @@ export class ImoveisService {
       where.tipo = q.tipo;
     }
     if (q.finalidade) {
-      where.finalidade = q.finalidade;
+      where.finalidade =
+        q.finalidade === 'AMBOS' ? 'AMBOS' : { in: finalidadesCompativeis(q.finalidade) };
     }
     if (q.status) {
       where.status = q.status;
     }
     if (q.destaque !== undefined) {
       where.destaque = q.destaque;
+    }
+    if (q.isLancamento !== undefined) {
+      where.isLancamento = q.isLancamento;
     }
     if (q.quartosMin !== undefined) {
       where.quartos = { gte: q.quartosMin };

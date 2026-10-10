@@ -43,11 +43,10 @@ export function finalidadesCompativeis(finalidade: Finalidade): Finalidade[] {
   switch (finalidade) {
     case 'ALUGUEL':
       return ['ALUGUEL', 'AMBOS'];
-    case 'AMBOS':
-      return ['VENDA', 'ALUGUEL', 'AMBOS', 'LANCAMENTO'];
     case 'VENDA':
-    case 'LANCAMENTO':
-      return ['VENDA', 'AMBOS', 'LANCAMENTO'];
+      return ['VENDA', 'AMBOS'];
+    case 'AMBOS':
+      return ['VENDA', 'ALUGUEL', 'AMBOS'];
   }
 }
 

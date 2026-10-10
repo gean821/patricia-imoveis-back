@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -20,6 +20,16 @@ import {
 import { PartialType } from '@nestjs/swagger';
 import { Finalidade, StatusImovel, TipoImovel } from '@prisma/client';
 import { BasePaginationQueryDto } from '../../../../shared/dto/base-pagination-query.dto';
+
+function QueryBoolean(): PropertyDecorator {
+  return Transform(({ obj, key }: { obj: Record<string, unknown>; key: string }) => {
+    const raw = obj[key];
+    if (raw === undefined) {
+      return undefined;
+    }
+    return raw === true || raw === 'true';
+  });
+}
 
 export class FotoInputDto {
   @IsString()
@@ -94,6 +104,10 @@ export class CreateImovelDto {
   @IsBoolean()
   destaque?: boolean;
 
+  @IsOptional()
+  @IsBoolean()
+  isLancamento?: boolean;
+
   @IsString() @IsNotEmpty() endereco: string;
   @IsOptional() @IsString() numero?: string;
   @IsOptional() @IsString() complemento?: string;
@@ -155,7 +169,8 @@ export class ListImoveisQueryDto extends BasePaginationQueryDto {
   @IsOptional() @Type(() => Number) @IsNumber() valorMax?: number;
   @IsOptional() @Type(() => Number) @IsInt() quartosMin?: number;
   @IsOptional() @Type(() => Number) @IsInt() vagasMin?: number;
-  @IsOptional() @Type(() => Boolean) @IsBoolean() destaque?: boolean;
+  @IsOptional() @QueryBoolean() @IsBoolean() destaque?: boolean;
+  @IsOptional() @QueryBoolean() @IsBoolean() isLancamento?: boolean;
   @IsOptional() @IsString() @MaxLength(100) bairroSlug?: string;
 }
 

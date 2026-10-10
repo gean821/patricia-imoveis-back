@@ -54,6 +54,7 @@ export function mapImovelToResponse(imovel: ImovelDetailed): ImovelResponseDto {
     finalidade: imovel.finalidade,
     status: imovel.status,
     destaque: imovel.destaque,
+    isLancamento: imovel.isLancamento,
 
     endereco: imovel.endereco,
     numero: imovel.numero,
@@ -111,6 +112,7 @@ export function mapImovelToListItem(imovel: ImovelListItem): ImovelListItemRespo
     finalidade: imovel.finalidade,
     status: imovel.status,
     destaque: imovel.destaque,
+    isLancamento: imovel.isLancamento,
     bairro: imovel.bairro,
     cidade: imovel.cidade,
     estado: imovel.estado,

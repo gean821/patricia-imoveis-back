@@ -23,14 +23,13 @@ const TIPO_LABELS: Record<TipoImovel, string> = {
   COMERCIAL: 'Comercial',
   GALPAO: 'Galpão',
   SALA: 'Sala',
-  CASA_DE_CONDOMINIO: 'Casa de condomínio',
+  CASA_DE_CONDOMINIO: 'Casa em condomínio',
 };
 
 const FINALIDADE_LABELS: Record<Finalidade, string> = {
   VENDA: 'Compra',
   ALUGUEL: 'Aluguel',
   AMBOS: 'Compra ou aluguel',
-  LANCAMENTO: 'Lançamento',
 };
 
 @Injectable()

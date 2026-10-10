@@ -66,4 +66,9 @@ describe('imoveis-similaridade', () => {
     expect(finalidadesCompativeis('VENDA')).not.toContain('ALUGUEL');
     expect(finalidadesCompativeis('ALUGUEL')).toEqual(['ALUGUEL', 'AMBOS']);
   });
+
+  it('venda e locação (AMBOS) atende quem compra e quem aluga', () => {
+    expect(finalidadesCompativeis('VENDA')).toEqual(['VENDA', 'AMBOS']);
+    expect(finalidadesCompativeis('AMBOS')).toEqual(['VENDA', 'ALUGUEL', 'AMBOS']);
+  });
 });

@@ -152,8 +152,6 @@ export class FeedPortaisService {
         return 'For Rent';
       case 'AMBOS':
         return 'For Sale/Rent';
-      case 'LANCAMENTO':
-        return 'For Sale';
     }
   }
 }
